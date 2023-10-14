@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %} YOur List {% endblock %}
+
+
+{% block main %}
+    <h1>Your List</h1>
+    <h1>Onde vai ficar a lista com as coisas de cada usuario</h1>
+    <h2>Cada item vai ter um botão para favoritar, que vai alterar no banco de dados a coluna is_Favorite para 1, e se tirar vai mudar para 0</h2>
+    <p>tava com a ideia de colocar um botão para alterar se vai somar na conta final ou não, as pessoas podem colocar itens e não quere somar no valor final. Para isso teria um botão que vai alterar no banco de dados a coluna will_sum para 0 (não somar) ou 1 (somar, valor padrão)</p>
+
+    <a href="/add">Adicione itens na lista</a>
+{% endblock %}

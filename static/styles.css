@@ -1,0 +1,60 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+} 
+
+.navbar-collapse {
+    flex-direction: row-reverse;
+}
+
+
+h3 {
+    padding: 1rem 0;    
+}
+
+footer {
+    background-color: aliceblue;
+    margin-top: auto;
+}
+
+footer .icon {
+    margin: 1rem 1rem;
+    color: rgba(0, 0, 0, 1);
+}
+
+footer .icon:hover {
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.d-flex {
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+}
+
+/* BACK TO TOP BUTTON */
+.back-to-top {
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.5s;
+}
+
+.back-to-top.show svg{
+    width: 2rem;
+    height: 2rem;
+}
+
+.back-to-top.show {
+    width: auto;
+    opacity: 1;
+    visibility: visible;
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    color: rgba(116,49,249, 1);
+}
+
+.back-to-top.show:hover {
+    color: rgba(116,49,249, 0.5);
+    transform: translateY(-5px);
+}

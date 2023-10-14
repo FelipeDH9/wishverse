@@ -1,5 +1,6 @@
-"# WishVerse" 
-
+# WishVerse
+#### Video demo: <URL>
+#### Description:
 My CS50's Final Project is a CRUD web application where the user can log in and build his/her shop wish list when he/she travels to the USA.
 The application will automatically add the 6% tax and convert the US dollar to his/her actual currency.
 
