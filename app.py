@@ -66,6 +66,17 @@ def logout():
 @app.route("/account")
 def account():
     return redirect("/")
+
+@app.route("/register", methods = ["POST", "GET"])
+def register():
+    if request.method == "POST":
+        pass
+
+
+    # GET
+    else:
+        return render_template("register.html")
+    
     
 
 

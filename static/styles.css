@@ -5,7 +5,7 @@
     --bg-color: #232D3F;
 }
 
-h1, h2, h3, h4, h5, h6, p, li, span {
+h1, h2, h3, h4, h5, h6, p, li, span, label {
     color: white;
     padding: 1rem 0;    
 }
@@ -32,6 +32,10 @@ header {
 
 body {
     background-color: var(--bg-color);
+}
+
+navbar-toggler {
+    background-color: var(--secondary-color);
 }
 /* end header */
 
@@ -89,4 +93,51 @@ a {
 a:hover {
     color: var(--secondary-color);
 }
+
+
+/* REGISTER */
+div.col {
+    text-align: center;
+}
+
+label {
+    width: 100%;
+}
+.btn {
+    margin-top: 1rem;
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    width: 100%;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background-color: var(--main-color);
+    border-color: var(--main-color);
+}
+
+/* END REGISTER */
+
+/* RESPONSIVE */
+/* REGISTER */
+@media (max-width: 767px){
+    .row {
+        display: block;
+    }
+
+    label {
+        padding-bottom: 8px;
+    }
+
+    .btn {
+        margin: 1rem 0 ;
+    }
+
+}
+
+/* @media (max-width: 767px){
+    .row {
+        display: flex;
+    }
+} */
 

@@ -4,8 +4,79 @@
 
 
 {% block main %}
-    <h1>Testando o layout do WishVerse</h1>
-    <h1>COM __name__ == '__main__'</h1>
-    <h2>dasiohdsaoi</h2>
-    <a href="/add">Adicione itens na lista</a>
+
+    <h1>Register in WishVerse and make your wishlist!</h1>
+    <p>Fields with * are obrigatory</p>
+
+    <form action="/register" method="post">
+
+        <div class="row">
+            <div class="col">
+                <label for="name">Your name *</label>
+                <input autofocus class="form-control" id="name" name="name" placeholder="Your name..." type="text">
+            </div>
+            <div class="col">
+                <label for="last-name">Your last name * </label>
+                <input class="form-control" id="last-name" name="last-name" placeholder="Last name..." type="text">
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col">
+
+                <label for="user-name">Create a user name * </label>
+                <input class="form-control" id="user-name" name="user-name" placeholder="User name..." type="text">
+            </div>
+
+            <div class="col">
+                <label for="github">Your github user, if you have</label>
+                <input class="form-control" id="github" name="github" placeholder="Your github..." type="text">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="password">Create a password * </label>
+                <input class="form-control" id="password" name="password" placeholder="Password..." type="password">
+            </div>
+    
+            <div class="col">
+                <label for="confirmation">Confirm your password * </label>
+                <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm password..." type="password">
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col">
+                <label for="city">Your city *</label>
+                <input class="form-control" id="city" name="city" placeholder="Your city..." type="text">
+            </div>
+            
+            <div class="col">
+                <label for="state">Your state *</label>
+                <input class="form-control" id="city" name="state" placeholder="Your state..." type="text">
+            </div>
+            
+            <div class="col">
+                <label for="country">Your country *</label>
+                <input class="form-control" id="country" name="country" placeholder="Your country..." type="text">
+            </div>
+        </div>
+
+        <label for="currency"></label>
+        <select class="custom-select" name="currency">
+            <option selected disabled>Choose your currency</option>
+            <option value="1">BRL</option>
+            <option value="2">CHF</option>
+            <option value="3">EUR</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+    </form>
+    
+
+
 {% endblock %}
