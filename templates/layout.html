@@ -8,13 +8,13 @@
 
         <link rel="stylesheet" href="/static/styles.css">
 
-        <title>WishVerse {% block title %}{% endblock %}</title>
+        <title>WishVerse{% block title %}{% endblock %}</title>
     </head>
     <body>
 
         <header>
             <div id="top"></div>
-            <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <nav class="navbar navbar-expand-lg">
             
                 <div class="container-fluid container">
                     <a class="navbar-brand" href="/">WishVerse</a>
@@ -24,11 +24,11 @@
                     <div class="collapse navbar-collapse" id="navbarNavDropdown">
                         
                         {# if has session #}    
-                        {% if session["user_id"] == 1%}
+                        {% if session["user_id"] %}
                         
                         <ul class="navbar-nav">
                             <li class="nav-item">
-                                <a class="nav-link" href="/">Your List</a>
+                                <a class="nav-link" href="/list">Your List</a>
                             </li>
     
                             <li class="nav-item">
@@ -78,7 +78,7 @@
         </a>
             
         <footer class="text-center text-lg-start">
-            <h3 class="text-center">Contacts</h3>
+            <h3 class="text-center">Contact</h3>
             <div class="container d-flex justify-content-center">
     
                 <a class="icon" href="https://www.github.com/felipedh9" target="_blank">
@@ -103,7 +103,7 @@
         
             <div class="text-center text-white p-3" style="background-color: rgba(0, 0, 0, 0.2);">
                 © 2023 Copyright:
-                <a class="text-white" href="https://github.com/felipedh9" target="_blank">Felipe Haddad</a>
+                <a href="https://github.com/felipedh9" target="_blank">Felipe Haddad</a>
             </div>
     
         </footer>

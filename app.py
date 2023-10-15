@@ -17,17 +17,34 @@ def get_db_connection():
 def index():
 
     session = {}
-    session["user_id"] = 1
+    session["user_id"] = 0
     session["user_name"] = "FelipeDH"
 
     # if not log in, render the home page which explains what the application is
-    if not session["user_id"]:
-        return render_template("list.html")
+    # if not session["user_id"]:
+    #     return render_template("index.html")
+    
+    # # if has session, than render the index which shows the users products
+    # else:
+    #     return render_template("list.html", session=session)
+
+    return render_template("index.html")
     
     # if has session, than render the index which shows the users products
-    else:
-        return render_template("index.html", session=session)
+    # else:
+    #     return render_template("list.html", session=session)
 
+@app.route("/list")
+def list():
+
+    session = {}
+    session["user_id"] = 1
+    session["user_name"] = "FelipeDH"
+
+    if session["user_id"]:
+        return render_template("list.html", session=session)
+    else:
+        return redirect("/")
 
 # TODO
 @app.route("/add")
@@ -45,10 +62,12 @@ def delete():
 def logout():
     return redirect("/")
 
+
 @app.route("/account")
 def account():
     return redirect("/")
     
+
 
 
 if __name__ == '__main__':

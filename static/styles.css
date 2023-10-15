@@ -1,36 +1,60 @@
+/* https://colorhunt.co/palette/0f0f0f232d3f005b41008170 */
+:root {
+    --main-color: rgba(0, 129, 112, 1);
+    --secondary-color: rgb(0, 165, 143);   
+    --bg-color: #232D3F;
+}
+
+h1, h2, h3, h4, h5, h6, p, li, span {
+    color: white;
+    padding: 1rem 0;    
+}
+
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 } 
 
+/* HEADER */
+/* send menu to the right */
 .navbar-collapse {
     flex-direction: row-reverse;
 }
 
-
-h3 {
-    padding: 1rem 0;    
+header {
+    background-color: var(--main-color);
 }
 
+.nave-link {
+    color: red !important;
+}
+
+body {
+    background-color: var(--bg-color);
+}
+/* end header */
+
+/* footer */
 footer {
-    background-color: aliceblue;
+    background-color: rgba(0, 0, 0, 0.2);
     margin-top: auto;
 }
 
 footer .icon {
     margin: 1rem 1rem;
-    color: rgba(0, 0, 0, 1);
+    color: var(--main-color);
 }
 
 footer .icon:hover {
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--secondary-color);
 }
 
 .d-flex {
     flex-wrap: wrap;
     padding-bottom: 1rem;
 }
+/* end footer */
 
 /* BACK TO TOP BUTTON */
 .back-to-top {
@@ -51,10 +75,18 @@ footer .icon:hover {
     position: fixed;
     right: 1.5rem;
     bottom: 1.5rem;
-    color: rgba(116,49,249, 1);
+    color: var(--main-color);
 }
 
 .back-to-top.show:hover {
-    color: rgba(116,49,249, 0.5);
-    transform: translateY(-5px);
+    color: var(--secondary-color);
 }
+
+a {
+    color: var(--main-color);
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
