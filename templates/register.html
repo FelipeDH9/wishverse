@@ -17,7 +17,7 @@
             </div>
             <div class="col">
                 <label for="last-name">Your last name * </label>
-                <input class="form-control" id="last-name" name="last-name" placeholder="Last name..." type="text">
+                <input class="form-control" id="last_name" name="last_name" placeholder="Last name..." type="text">
             </div>
         </div>
 
@@ -26,7 +26,7 @@
             <div class="col">
 
                 <label for="user-name">Create a user name * </label>
-                <input class="form-control" id="user-name" name="user-name" placeholder="User name..." type="text">
+                <input class="form-control" id="user_name" name="user_name" placeholder="User name..." type="text">
             </div>
 
             <div class="col">
@@ -56,7 +56,7 @@
             
             <div class="col">
                 <label for="state">Your state *</label>
-                <input class="form-control" id="city" name="state" placeholder="Your state..." type="text">
+                <input class="form-control" id="state" name="state" placeholder="Your state..." type="text">
             </div>
             
             <div class="col">
@@ -65,13 +65,15 @@
             </div>
         </div>
 
-        <label for="currency"></label>
-        <select class="custom-select" name="currency">
-            <option selected disabled>Choose your currency</option>
-            <option value="1">BRL</option>
-            <option value="2">CHF</option>
-            <option value="3">EUR</option>
-        </select>
+        <div class="flex">
+            <label class="currency" for="currency">Choose your currency to convert to USD:</label>
+            <select class="custom-select" id="currency" name="currency">
+                <option selected disabled>Choose your currency</option>
+                {% for currency in currencies%}
+                    <option value="{{currency['iso']}}">{{ currency['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>
 
