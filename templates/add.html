@@ -3,6 +3,47 @@
 {% block title%}Add{% endblock%}
 
 {% block main %}
-    <h1>Adicione itens na lista</h1>
-    <a href="/">Voltar para index</a>
+    <h1 class="text-center">Add items to your list</h1>
+    <h5 class="text-center">Fields with * on it are required</h5>
+
+    <form action="/add" method="post">
+
+        <div class="row">
+            <div class="col">
+                <label for="brand">Item Brand *</label>
+                <input autofocus class="form-control" id="brand" name="brand" placeholder="E.g., Samsung" type="text">
+            </div>
+            <div class="col">
+                <label for="name">Item Name *</label>
+                <input class="form-control" id="name" name="name" placeholder="E.g., Galaxy S23" type="text">
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col">
+                <label for="price">Item Price *</label>
+                <input class="form-control" id="price" name="price" placeholder="E.g., 799.99" type="number">
+            </div>
+
+            <div class="col">
+                <label for="has_tax">Does the item has 6% tax? *</label>
+                <select class="tax custom-select" id="has_tax" name="has_tax">
+                    <option selected value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+        </div>
+
+        <label for="item_link">Item link</label>
+        <input class="form-control" id="item_link" name="item_link" placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..." type="text">
+
+        <label for="item_infos">Item informations</label>
+        <input class="form-control" id="item_infos" name="item_infos" placeholder="E.g., Can be found in Samsung stores, or another sites" type="text">
+
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+    </form>
+
 {% endblock %}

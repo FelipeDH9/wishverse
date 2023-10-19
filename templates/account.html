@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %} My account{% endblock %}
+
+
+{% block main %}
+    
+<div class="account">
+    <h1 class="text-center">Your account</h1>
+    <a href="/currency" class="center btn">Change your currency convertion at any time</a>
+    
+    <div class="flex">
+        <img class="user-image" src="{{ avatar_url }}" alt="GitHub Avatar">
+        <p class="no-spacing">Felipe</p>
+    </div>
+
+    <form action="/change" method="post">
+    
+
+
+        <h2 class="text-center">Update any informations you want</h2>
+        <p class="text-center">Colocar como placeholder as informações atuais do usuario</p>
+        <div class="row">
+            <div class="col">
+                <label for="password">Change your password</label>
+                <input class="form-control" id="password" name="password" placeholder="Password..." type="password">
+            </div>
+            
+            <div class="col">
+                <label for="confirmation">Confirm your new password </label>
+                <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm password..." type="password">
+            </div>
+        </div>
+        <div class="row">
+            
+            <div class="col">
+                <label for="city">Your city *</label>
+                <input class="form-control" id="city" name="city" placeholder="Your city..." type="text">
+            </div>
+            
+            <div class="col">
+            <label for="state">Your state *</label>
+            <input class="form-control" id="state" name="state" placeholder="Your state..." type="text">
+        </div>
+        
+        <div class="col">
+            <label for="country">Your country *</label>
+            <input class="form-control" id="country" name="country" placeholder="Your country..." type="text">
+        </div>
+    
+    
+        <button type="submit" class="btn btn-primary">Update your infos</button>
+    </form>
+    
+    
+</div>
+
+
+{% endblock %}
