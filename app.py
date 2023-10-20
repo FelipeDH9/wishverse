@@ -19,21 +19,27 @@ def get_db_connection():
     return conn
 
 
-CURRENCIES = [
-            {'iso':'EUR','name': 'Euro'},
-            {'iso':'BRL','name': 'Brazilian Real'},
-            {'iso':'JPY','name': 'Japanese yen'},
-            {'iso':'GBP','name': 'Pound sterling'}, 
-            {'iso':'AUD','name': 'Australian dollar'}, 
-            {'iso':'CAD','name': 'Canadian dollar'}, 
-            {'iso':'CHF','name': 'Swiss franc'}, 
-            {'iso':'CNH','name': 'Chinese renminbi'}, 
-            {'iso':'HKD','name': 'Hong Kong dollar'}, 
-            {'iso':'NZD','name': 'New Zealand dollar'}, 
-            {'iso':'MXN','name': 'Mexixan peso'}
-            ]
+UNSORTED_CURRENCIES = [
+            {"iso":"EUR","name": "Euro"},
+            {"iso":"BRL","name": "Brazilian Real"},
+            {"iso":"JPY","name": "Japanese yen"},
+            {"iso":"GBP","name": "Pound sterling"}, 
+            {"iso":"AUD","name": "Australian dollar"}, 
+            {"iso":"CAD","name": "Canadian dollar"}, 
+            {"iso":"CHF","name": "Swiss franc"}, 
+            {"iso":"CNH","name": "Chinese renminbi"}, 
+            {"iso":"HKD","name": "Hong Kong dollar"}, 
+            {"iso":"NZD","name": "New Zealand dollar"}, 
+            {"iso":"MXN","name": "Mexixan peso"},
+            {"iso":"ETH","name": "Ethereum"},
+            {"iso":"BTC","name": "Bitcoin"},
+            {"iso":"XAU","name": "Gold"}
+            ]   
 
-# list of currencies iso codes
+# currencies sorted alphabetically
+CURRENCIES = sorted(UNSORTED_CURRENCIES, key=lambda x: x['name'])
+
+# list of currencies iso codes 
 CURRENCIES_ISO = [currency['iso'] for currency in CURRENCIES]
 
 
@@ -58,6 +64,33 @@ def index():
     # if has session, than render the index which shows the users products
     # else:
     #     return render_template("list.html", session=session)
+
+@app.route("/register", methods = ["POST", "GET"])
+def register():
+    if request.method == "POST":
+
+        name = request.form.get("name")
+        last_name = request.form.get("last_name")
+        user_name = request.form.get("user_name")
+        github = request.form.get("github")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+        city = request.form.get("city")
+        state = request.form.get("state")
+        country = request.form.get("country")
+        currency = request.form.get("currency")
+        
+        # validate if currency exists
+        if currency not in CURRENCIES_ISO:
+            return render_template("message.html", message="Currency not valid, please choose one in the select field!")
+        else:
+            return render_template("message.html", message="Currency valid!")
+
+    
+    # GET
+    else:
+        return render_template("register.html", currencies=CURRENCIES)
+    
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -224,34 +257,7 @@ def account():
 
 
 
-@app.route("/register", methods = ["POST", "GET"])
-def register():
-    if request.method == "POST":
 
-        name = request.form.get("name")
-        last_name = request.form.get("last_name")
-        user_name = request.form.get("user_name")
-        github = request.form.get("github")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirmation")
-        city = request.form.get("city")
-        state = request.form.get("state")
-        country = request.form.get("country")
-        currency = request.form.get("currency")
-        
-        # validate if currency exists
-        if currency not in CURRENCIES_ISO:
-            return render_template("message.html", message="Currency not valid, please choose one in the select field!")
-        else:
-            return render_template("message.html", message="Currency valid!")
-
-        
-
-
-    # GET
-    else:
-        return render_template("register.html", currencies=CURRENCIES)
-    
     
 @app.route("/currency", methods = ["POST", "GET"])
 def currency():
@@ -267,11 +273,26 @@ def currency():
         return render_template("currency.html", currencies=CURRENCIES)
 
 
-@app.route("/change", methods = ["POST"])
+@app.route("/edit", methods = ["POST", "GET"])
 def change():
     # change  infos in the database for that user
+    if request.method == "POST":
 
-        return render_template("message.html", message="Infos changed")
+        item_brand = request.form.get("brand")
+        item_name = request.form.get("name")
+        item_price = request.form.get("price")
+        item_infos = request.form.get("item_infos")
+        item_tax = request.form.get("has_tax")
+        item_link = request.form.get("item_link")
+
+        # UDPATE IN DATABASE
+
+        return redirect("/list")
+
+    else: #GET
+        item_name = request.args.get("item_name")
+        return render_template("edit.html", item_name=item_name)
+        # return render_template("message.html", message="Infos changed")
 
 
 if __name__ == '__main__':

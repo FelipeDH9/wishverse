@@ -1,9 +1,12 @@
-# Venv
-.venv/
-
 # pycache
 __pycache__/
+
+# Venv
+.venv/
 
 # db
 /static/database.db
 /database.db
+
+# flask_session
+flask_session/

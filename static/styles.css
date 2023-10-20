@@ -8,6 +8,7 @@
 h1, h2, h3, h4, h5, h6, p, li, span, label {
     color: white;
     padding: 1rem 0;    
+    /* word-wrap: break-word; */
 }
 
 
@@ -158,6 +159,20 @@ label {
     width: 100%;
 }
 
+
+/* .btn2 {
+    background-color: var(--main-color);
+    border: 1px solid var(--main-color);
+    width: 100%;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.btn2 > span {
+    color: black;
+    padding: 5px;
+    
+} */
 .btn {
     margin-top: 1rem;
     background-color: var(--secondary-color);
@@ -187,6 +202,7 @@ label {
 .custom-select {
     border-radius: 5px;
     margin: 1rem;
+    height: 2.5rem;
 }
 
 /* END REGISTER */
@@ -243,11 +259,36 @@ label {
     display: flex;
     align-items: center;
 }
+
 .delete-btn span {
     padding: 5px;
+    font-weight: bold;
 }
 
 .delete-btn:hover{
+    text-decoration: underline;
+    opacity: 0.5;
+}
+
+/* edit item button */
+.edit-btn {
+    text-decoration: none;
+    color: black;
+    background-color: var(--main-color);
+    border: 1px solid var(--main-color);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    padding: 0px 14px;
+}
+
+.edit-btn span {
+    padding: 5px;
+    color: black;
+    font-weight: bold;
+}
+
+.edit-btn:hover{
     text-decoration: underline;
     opacity: 0.5;
 }
@@ -308,18 +349,40 @@ label {
     }
     
     .delete-btn {
-        margin-top: 1rem;
+        margin-top: 2rem;
     }
 
+    .edit-btn {
+        margin-bottom: 1rem;
+    }
+
+    
     /* .card-infos {
         margin-bottom: 0;
         padding: 8px;
     } */
 }
 
-/* @media (max-width: 767px){
-    .row {
-        display: flex;
+@media (max-width: 320px){
+    button.btn {
+        width: 100%;
     }
-} */
+
+    select {
+        width: 80%;
+    }
+   
+    .navbar-brand {
+        font-size: 1rem;
+    }
+
+    .navbar-toggler > svg {
+        width: 1.5rem;
+        height: auto;
+    }
+    
+    .navbar-toggler{
+        margin: 0;
+    }
+}
 

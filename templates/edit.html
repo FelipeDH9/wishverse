@@ -1,20 +1,22 @@
 {% extends "layout.html" %}
 
-{% block title%} Add Item{% endblock%}
+{% block title%} Edit {{ item_name }}{% endblock%}
 
 {% block main %}
-    <h1 class="text-center">Add items to your list</h1>
-    <h5 class="text-center">Fields with * on it are required</h5>
+    <h1 class="text-center">Edit: {{ item_name }}</h1>
+    <h5 class="text-center">Edit just the fields you wnat, nothing is required</h5>
+    <p>usar dados do item como placeholders</p>
+    <p>pegar o id dele pelo get, e fazer uma busca no database por ele e pegar todas as infos dele</p>
 
-    <form action="/add" method="post">
+    <form action="/edit" method="post">
 
         <div class="row">
             <div class="col">
-                <label for="brand">Item Brand *</label>
+                <label for="brand">Item Brand</label>
                 <input autofocus class="form-control" id="brand" name="brand" placeholder="E.g., Samsung" type="text">
             </div>
             <div class="col">
-                <label for="name">Item Name *</label>
+                <label for="name">Item Name</label>
                 <input class="form-control" id="name" name="name" placeholder="E.g., Galaxy S23" type="text">
             </div>
         </div>
@@ -22,12 +24,12 @@
 
         <div class="row">
             <div class="col">
-                <label for="price">Item Price *</label>
+                <label for="price">Item Price</label>
                 <input class="form-control" id="price" name="price" placeholder="E.g., 799.99" type="number">
             </div>
 
             <div class="col">
-                <label for="has_tax">Does the item has 6% tax? *</label>
+                <label for="has_tax">Does the item has 6% tax?</label>
                 <select class="tax custom-select" id="has_tax" name="has_tax">
                     <option selected value="1">Yes</option>
                     <option value="0">No</option>
