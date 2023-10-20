@@ -6,7 +6,11 @@
 {% block main %}
     <div>
 
-        <h1 class="text-center">Hello User, this is your wishlist</h1>
+        <div class="flex user-flex">
+            <img class="user-image" src="{{ avatar_url }}" alt="GitHub Avatar">
+            <p class="no-spacing">Felipe</p>
+        </div>
+        <h1 class="text-center">Your wishlist</h1>
         <div class="flex space-around">
             <h3>USD Total: $1,695.36</h3>
             <h3>Your currency total: R$8.815,872</h3>

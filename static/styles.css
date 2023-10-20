@@ -56,10 +56,6 @@ header {
 }
 
 
-navbar-toggler {
-    background-color: var(--secondary-color);
-}
-
 .nav-item .nav-link {
 	font-weight: bold;
 	color: white;
@@ -67,7 +63,7 @@ navbar-toggler {
 }
 
 .nav-item .nav-link:hover {
-	color: var(--secondary-color);
+    color: var(--secondary-color);
 }
 
 .navbar-brand {
@@ -77,18 +73,27 @@ navbar-toggler {
 }
 
 .navbar-brand:hover {
-	color: var(--secondary-color);
-
+    color: var(--secondary-color);
 }
 
 .navbar-toggler {
-    background-color:var(--secondary-color);
-    border-color: var(--secondary-color);
+    margin: 0.5rem;
+    border: none;
 }
+
+.navbar-toggler > svg {
+    width: 3rem;
+    height: auto;
+}
+
+.nav-item {
+	padding: 4px;
+}
+
 
 /* end header */
 
-/* footer */
+/* FOOTER */
 footer {
     background-color: rgba(0, 0, 0, 0.2);
     margin-top: auto;
@@ -152,6 +157,7 @@ div.col {
 label {
     width: 100%;
 }
+
 .btn {
     margin-top: 1rem;
     background-color: var(--secondary-color);
@@ -259,12 +265,12 @@ label {
 }
 
 /* ACCOUNT */
-.account > .flex {
+.user-flex {
     align-items: center;
     margin-top: 1rem;
 }
 
-.account > .flex > p {
+.user-flex > p {
     font-size: 2rem;
 }
 

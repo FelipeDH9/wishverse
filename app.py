@@ -1,11 +1,17 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 # from cs50 import SQL
 import sqlite3
 import requests
+from werkzeug.security import check_password_hash, generate_password_hash
 
-# from flask_session import Session
+from flask_session import Session
 
 app = Flask(__name__)
+
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -53,6 +59,64 @@ def index():
     # else:
     #     return render_template("list.html", session=session)
 
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+
+        # Forget any user_id
+        session.clear()
+
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return render_template("message.html", message="Username must be provided")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return render_template("message.html", message="Password must be provided")
+            
+        # Query database for username
+        # rows = db.execute("SELECT * FROM users WHERE username = ?", username)
+
+        # Ensure username exists and password is correct
+        # if len(rows) != 1 or not check_password_hash(
+        #     rows[0]["hash"], request.form.get("password")
+        # ):
+            # return apology("invalid username and/or password", 403)
+        pass
+
+        # Remember which user has logged in
+        # session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    else: # GET
+        return render_template("login.html")
+    
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+    # res = requests.get("http://economia.awesomeapi.com.br/json/last/USD-BRL")
+
+    # https://avatars.githubusercontent.com/u/90584577?v=4
+    # <Response [200]>
+
+
+    # res = res.json()
+    # {'USDBRL': {'code': 'USD', 'codein': 'BRL', 'name': 'Dólar Americano/Real Brasileiro', 'high': '5.083', 'low': '5.0196', 'varBid': '-0.008', 'pctChange': '-0.16', 'bid': '5.0508', 'ask': '5.0515', 'timestamp': '1697743091', 'create_date': '2023-10-19 16:18:11'}}
+    
+    
+    # res = res['USDBRL']['high']
+    # 5.083
+
+    # return render_template("message.html")
+    # return redirect("/")
+
 @app.route("/list")
 def list():
 
@@ -60,8 +124,13 @@ def list():
     session["user_id"] = 1
     session["user_name"] = "FelipeDH"
 
+    github_response = (requests.get("https://api.github.com/users/felipedh9")).json()
+    avatar_url = github_response['avatar_url']
+    
+    if not avatar_url:
+        avatar_url = '#'
     if session["user_id"]:
-        return render_template("list.html", session=session)
+        return render_template("list.html", session=session, avatar_url=avatar_url)
     else:
         return redirect("/")
 
@@ -128,35 +197,7 @@ def delete():
 
 
 
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        user = request.form.get("user")
-        password = request.form.get("password")
 
-        return render_template("login.html")
-        
-
-    else: # GET
-        return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    res = requests.get("http://economia.awesomeapi.com.br/json/last/USD-BRL")
-
-    # https://avatars.githubusercontent.com/u/90584577?v=4
-    # <Response [200]>
-
-
-    res = res.json()
-    # {'USDBRL': {'code': 'USD', 'codein': 'BRL', 'name': 'Dólar Americano/Real Brasileiro', 'high': '5.083', 'low': '5.0196', 'varBid': '-0.008', 'pctChange': '-0.16', 'bid': '5.0508', 'ask': '5.0515', 'timestamp': '1697743091', 'create_date': '2023-10-19 16:18:11'}}
-    
-    
-    res = res['USDBRL']['high']
-    # 5.083
-
-    return render_template("message.html")
-    # return redirect("/")
 
 
 @app.route("/account", methods=["POST", "GET"])
