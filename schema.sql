@@ -27,7 +27,6 @@ CREATE TABLE IF NOT EXISTS user_products (
     user_id INTERGER NOT NULL,
     product_id INTEGER NOT NULL,
     quantity INTERGER NOT NULL,
-
     FOREIGN KEY(product_id) REFERENCES products(id),
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
