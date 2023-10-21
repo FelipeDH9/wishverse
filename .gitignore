@@ -9,4 +9,4 @@ __pycache__/
 /database.db
 
 # flask_session
-/flask_session
+flask_session/

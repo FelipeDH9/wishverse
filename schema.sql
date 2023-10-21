@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    lastname TEXT NOT NULL,
-    username TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    user_name TEXT NOT NULL,
     hash TEXT NOT NULL,
     city TEXT NOT NULL,
     state TEXT NOT NULL,
