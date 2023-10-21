@@ -4,12 +4,21 @@
 
 
 {% block main %}
-    <h1>Index do WishVerse</h1>
-    <h1>What is WishVerse?</h1>
-    <p>It is a web application focused for those who does not live in USA (<i>United State of America</i>) and plan to travel to there. </p>
-    <h3>página home, que vai aparecer se a pessoa estiver logada ou não, é para explicar o que o projeto faz, vai mostrar que da para se registrar, adicionar produtos na lista, colocar os links que quiser, o preço do produto, que da para alterar as informações de cada produto, alterar senha, cidade, estado, país, moedas.
-    </h3>
+    <div class="text-center">
 
+        {% if user %}
+            <h1>Hello, {{user[0]["name"]}}!</h1>
+        {% endif%}
 
-    <a href="/add">Adicione itens na lista</a>
+        <h1>Welcome to WishVerse!</h1>
+        <h4>WishVerse is a web application focused for those who does not live in USA (<i>United State of America</i>) and plan to travel to there. </h4>
+        <h3>página home, que vai aparecer se a pessoa estiver logada ou não, é para explicar o que o projeto faz, vai mostrar que da para se registrar, adicionar produtos na lista, colocar os links que quiser, o preço do produto, que da para alterar as informações de cada produto, alterar senha, cidade, estado, país, moedas.
+        </h3>
+        
+        {% if user %}
+            <a href="/add">Add items to your wishlist!</a>
+
+        {% endif %}
+        
+    </div>
 {% endblock %}

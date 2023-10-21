@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session
 import sqlite3
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
 
 from flask_session import Session
 
@@ -50,32 +51,28 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+def login_required(f):
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_id") is None:
+            return redirect("/read")
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 
 @app.route("/")
+@login_required
 def index():
-
-    # session["user_id"]
-    # if not session["user_id"]:
-
-    #     return render_template("index.html")
-    
-    # else:
-    #     user_id = session["user_id"]
     user_id = session["user_id"]
-
-    # if not log in, render the home page which explains what the application is
-    # if not session["user_id"]:
-    #     return render_template("index.html")
     
-    # # if has session, than render the index which shows the users products
-    # else:
-    #     return render_template("list.html", session=session)
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
+    conn.close()
 
-    return render_template("index.html")
-    
-    # if has session, than render the index which shows the users products
-    # else:
-    #     return render_template("list.html", session=session)
+    return render_template("index.html", user=user)
+ 
 
 @app.route("/register", methods = ["POST", "GET"])
 def register():
@@ -170,6 +167,7 @@ def login():
         else:
 
             session["user_id"] = rows[0]["id"]
+            session["name"] = rows[0]["name"]
 
             return redirect("/")
            
@@ -179,6 +177,7 @@ def login():
     
 
 @app.route("/logout")
+@login_required
 def logout():
     session.clear()
     return redirect("/")
@@ -199,11 +198,14 @@ def logout():
     # return redirect("/")
 
 @app.route("/list")
+@login_required
 def list():
 
-    session = {}
-    session["user_id"] = 1
-    session["user_name"] = "FelipeDH"
+    user_id = session["user_id"]
+    
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
+    conn.close()
 
     github_response = (requests.get("https://api.github.com/users/felipedh9")).json()
     avatar_url = github_response['avatar_url']
@@ -217,6 +219,7 @@ def list():
 
 
 @app.route("/add", methods=["POST", "GET"])
+@login_required
 def add():
 
     if request.method == "POST":
@@ -240,6 +243,7 @@ def add():
 
 # TODO
 @app.route("/favorite", methods=["POST"])
+@login_required
 def favorite():
 
     item_id = int(request.form.get("item_id"))
@@ -266,6 +270,7 @@ def favorite():
 
 # TODO
 @app.route("/delete", methods=["POST"])
+@login_required
 def delete():
     item_id = request.form.get("item_id")
     
@@ -282,6 +287,7 @@ def delete():
 
 
 @app.route("/account", methods=["POST", "GET"])
+@login_required
 def account():
 
     if request.method == "POST":
@@ -308,6 +314,7 @@ def account():
 
     
 @app.route("/currency", methods = ["POST", "GET"])
+@login_required
 def currency():
     # change currency in the database
     if request.method == "POST":
@@ -322,6 +329,7 @@ def currency():
 
 
 @app.route("/edit", methods = ["POST", "GET"])
+@login_required
 def change():
     # change  infos in the database for that user
     if request.method == "POST":
@@ -343,9 +351,9 @@ def change():
         # return render_template("message.html", message="Infos changed")
 
 
-# @app.route("/read")
-# def read():
-#     return render_template("read.html")
+@app.route("/read")
+def read():
+    return render_template("index.html")
 
 
 if __name__ == '__main__':
@@ -355,15 +363,3 @@ if __name__ == '__main__':
 
 # flask --app app.py --debug run
 
-# @app.route("/defavorite", methods=["POST"])
-# def defavorite():
-
-#     item_id = request.form.get("item_id")
-
-#     if not item_id:
-#         return render_template("message.html", message="Item couldn't be defavorite")
-#     else:
-#         # change is_Favorite to zero in database the selected item via its ID
-#         pass
-#         return render_template("message.html", message=f'{item_id} item defavorite')
-    
