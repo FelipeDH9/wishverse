@@ -10,3 +10,6 @@ __pycache__/
 
 # flask_session
 flask_session/
+
+
+delete_tables.py

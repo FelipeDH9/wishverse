@@ -3,8 +3,8 @@ import sqlite3
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
-
 from flask_session import Session
+
 
 app = Flask(__name__)
 
@@ -43,6 +43,7 @@ CURRENCIES = sorted(UNSORTED_CURRENCIES, key=lambda x: x['name'])
 # list of currencies iso codes 
 CURRENCIES_ISO = [currency['iso'] for currency in CURRENCIES]
 
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -51,8 +52,8 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-def login_required(f):
 
+def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
@@ -122,10 +123,13 @@ def register():
             
             conn.commit()
 
-            user_id = conn.execute("SELECT id FROM users WHERE user_name = ?", (user_name,)).fetchall()
+            rows = conn.execute("SELECT * FROM users WHERE user_name = ?", (user_name,)).fetchall()
             conn.close()
 
-            session["user_id"] = user_id[0]["id"]
+            session["user_id"] = rows[0]["id"]
+            session["name"] = rows[0]["name"]
+            session["currency"] = rows[0]["currency"]
+
             return redirect("/")
 
 
@@ -160,7 +164,7 @@ def login():
         if len(rows) != 1:
             return render_template("message.html", message="User do not exist, please register")
         
-        # check if password salved in DB is equal to password provided
+        # check if password saved in DB is equal to password provided
         elif not check_password_hash(rows[0]["hash"], password):
             return render_template("message.html", message="Incorrect password")
 
@@ -168,6 +172,8 @@ def login():
 
             session["user_id"] = rows[0]["id"]
             session["name"] = rows[0]["name"]
+            session["currency"] = rows[0]["currency"]
+
 
             return redirect("/")
            
@@ -197,26 +203,6 @@ def logout():
     # return render_template("message.html")
     # return redirect("/")
 
-@app.route("/list")
-@login_required
-def list():
-
-    user_id = session["user_id"]
-    
-    conn = get_db_connection()
-    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
-    conn.close()
-
-    github_response = (requests.get("https://api.github.com/users/felipedh9")).json()
-    avatar_url = github_response['avatar_url']
-    
-    if not avatar_url:
-        avatar_url = '#'
-    if session["user_id"]:
-        return render_template("list.html", session=session, avatar_url=avatar_url)
-    else:
-        return redirect("/")
-
 
 @app.route("/add", methods=["POST", "GET"])
 @login_required
@@ -224,21 +210,68 @@ def add():
 
     if request.method == "POST":
 
-        item_brand = request.form.get("brand")
-        item_name = request.form.get("name")
+        item_brand = request.form.get("brand").title()
+        item_name = request.form.get("name").title()
         item_price = request.form.get("price")
-        item_infos = request.form.get("item_infos")
+        item_infos = request.form.get("item_infos").title()
         item_tax = request.form.get("has_tax")
         item_link = request.form.get("item_link")
+        quantity = request.form.get("quantity")
+
+        user_id = session["user_id"]
+
 
         if not item_brand or not item_name or not item_price or not item_tax:
             return render_template("message.html", message="Please fill all fileds with *")
+        
+        elif not item_price.isdigit() or float(item_price) <= 0:
+            return render_template("message.html", message="Price must be a real positive number")
+        
+        elif not quantity.isdigit() or int(quantity) <= 0:
+            return render_template("message.html", message="Quantity must be a integer positive number")
+
         else:
-            # add to the database
-            pass
+            conn = get_db_connection()
+            conn.execute("INSERT INTO products(name, brand, informations, has_tax, link, price, user_id, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (item_name, item_brand, item_infos, item_tax, item_link, item_price, user_id, quantity))
+            
+            conn.commit()
+            conn.close()
+
         return render_template("message.html", message="Item added")
+    
+    
     else: # GET
         return render_template("add.html")
+
+
+@app.route("/list")
+@login_required
+def list():
+
+    user_id = session["user_id"]
+    user_name = session["name"]
+    
+    conn = get_db_connection()
+    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
+    user_products = conn.execute("SELECT * FROM products WHERE user_id = ?", (user_id,)).fetchall()
+    conn.close()
+
+    github_username = user[0]["github_username"]
+    avatar_url = ""
+
+    if not github_username:
+        avatar_url = "/static/avatar.png"
+
+    else:
+        github_response = (requests.get(f"https://api.github.com/users/{github_username}")).json()
+        avatar_url = github_response['avatar_url']
+    
+    if session["user_id"]:
+        return render_template("list.html", session=session, avatar_url=avatar_url)
+    
+    else:
+        return redirect("/")
+    
 
 
 # TODO
@@ -267,6 +300,8 @@ def favorite():
     #     # chenge to one in the database the is_favorite from the selected item
     #     pass
     #     return render_template("message.html", message='item added to favorites')
+
+
 
 # TODO
 @app.route("/delete", methods=["POST"])
@@ -316,9 +351,25 @@ def account():
 @app.route("/currency", methods = ["POST", "GET"])
 @login_required
 def currency():
+
+    user_id = session["user_id"]
+
+
     # change currency in the database
     if request.method == "POST":
+        
+        currency = request.form.get("currency")
 
+        if currency not in CURRENCIES_ISO:
+            return render_template("message.html", message="Currency invalid, choose one in the select field!")
+        
+        else:
+            conn = get_db_connection()
+            conn.execute("UPDATE users SET currency = ? WHERE id = ?", (currency, user_id,))
+            conn.commit()
+            conn.close()
+
+            session["currency"] = currency
 
 
         return render_template("message.html", message="Currency changed")

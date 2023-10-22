@@ -8,7 +8,7 @@
 
         <div class="flex user-flex">
             <img class="user-image" src="{{ avatar_url }}" alt="GitHub Avatar">
-            <p class="no-spacing">Felipe</p>
+            <p class="no-spacing"> {{ session["name"] }}, you are using: {{ session["currency"] }}</p>
         </div>
         <h1 class="text-center">Your wishlist</h1>
         <div class="flex space-around">
