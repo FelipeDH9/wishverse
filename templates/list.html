@@ -1,133 +1,245 @@
 {% extends "layout.html" %}
 
-{% block title %} Your List {% endblock %}
+{% block title %}: Your List {% endblock %}
 
 
 {% block main %}
     <div>
 
+        <h1 class="text-center">Your wishlist</h1>
+        
         <div class="flex user-flex">
             <img class="user-image" src="{{ avatar_url }}" alt="GitHub Avatar">
-            <p class="no-spacing"> {{ session["name"] }}, you are using: {{ session["currency"] }}</p>
+            <p class="no-spacing"> {{ session["name"] }}, you are using: {{ session["currency"] }} (<i>{{ session["currency_name"] }}</i>)</p>
         </div>
-        <h1 class="text-center">Your wishlist</h1>
-        <div class="flex space-around">
-            <h3>USD Total: $1,695.36</h3>
-            <h3>Your currency total: R$8.815,872</h3>
-        </div>
-        <h2>Cada item vai ter um botão para favoritar, que vai alterar no banco de dados a coluna is_Favorite para 1, e se tirar vai mudar para 0, e vai renderizar em um local diferente e na lista total</h2>
+
+        <h3 class="text-center">Conversion: 1 USD = {{ conversion }} {{ session["currency"] }}</h3>
+
         <a href="/currency" class="center btn"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-currency-exchange" viewBox="0 0 16 16">
             <path d="M0 5a5.002 5.002 0 0 0 4.027 4.905 6.46 6.46 0 0 1 .544-2.073C3.695 7.536 3.132 6.864 3 5.91h-.5v-.426h.466V5.05c0-.046 0-.093.004-.135H2.5v-.427h.511C3.236 3.24 4.213 2.5 5.681 2.5c.316 0 .59.031.819.085v.733a3.46 3.46 0 0 0-.815-.082c-.919 0-1.538.466-1.734 1.252h1.917v.427h-1.98c-.003.046-.003.097-.003.147v.422h1.983v.427H3.93c.118.602.468 1.03 1.005 1.229a6.5 6.5 0 0 1 4.97-3.113A5.002 5.002 0 0 0 0 5zm16 5.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0zm-7.75 1.322c.069.835.746 1.485 1.964 1.562V14h.54v-.62c1.259-.086 1.996-.74 1.996-1.69 0-.865-.563-1.31-1.57-1.54l-.426-.1V8.374c.54.06.884.347.966.745h.948c-.07-.804-.779-1.433-1.914-1.502V7h-.54v.629c-1.076.103-1.808.732-1.808 1.622 0 .787.544 1.288 1.45 1.493l.358.085v1.78c-.554-.08-.92-.376-1.003-.787H8.25zm1.96-1.895c-.532-.12-.82-.364-.82-.732 0-.41.311-.719.824-.809v1.54h-.005zm.622 1.044c.645.145.943.38.943.796 0 .474-.37.8-1.02.86v-1.674l.077.018z"/>
-          </svg> Change your currency convertion at any time</a>
-        <h2 class="text-center">Favorites</h2>
-        <p>Vai renderizar apenas items que são favorites, ou seja, if is_favorite == 1</p>
-        <div class="flex space-around">
-            <h3>USD Total: $1,695.36</h3>
-            <h3>Your currency total: R$8.815,872</h3>
-        </div>
+          </svg> Change your currency at any time</a>
+
+        <a class="center btn" href="/add"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bag-plus-fill" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5v-.5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0zM8.5 8a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V12a.5.5 0 0 0 1 0v-1.5H10a.5.5 0 0 0 0-1H8.5V8z"/>
+          </svg> Add new product</a>
+
+        {% if user_products != [] %}
+            <h2 class="text-center">Favorites</h2>
+
+            <div class="flex space-around">
+                <h3>USD Total: ${{ total_favorites_price }}</h3>
+                <h3>Your currency total: R${{ total_favorites_converted }}</h3>
+            </div>
+            
+            {% for product in user_products %}
+                {% if product["is_favorite"] == 1 %}
+                    {# printar cartão para itens favoritos #}
+                    <div class="card">
+                        <div class="card-body">
+                            {# card header #}
+                            <div class="flex space-between">
+                                <h2>{{ product["brand"] }} - {{ product["name"] }}</h2>
+            
+                                
+                                <form action="/favorite" method="post">
+                                    <input name="item_id" type="hidden" value="{{ product['id'] }}">
+                                    <button type="submit" class="favorite-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-heart-fill" viewBox="0 0 16 16">
+                                        <path d="M2 15.5a.5.5 0 0 0 .74.439L8 13.069l5.26 2.87A.5.5 0 0 0 14 15.5V2a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v13.5zM8 4.41c1.387-1.425 4.854 1.07 0 4.277C3.146 5.48 6.613 2.986 8 4.412z"/>
+                                    </svg> <span>Remove Favorite</span></button>
+                                </form>
+                    
+                            </div>
+            
+                            {# card main #}
+                            <div class="flex space-around">
+                                <p class="card-infos"><span class="bold">Price in USD: </span>{{ product["price"] }}</p>
+                                <p class="card-infos"><span class="bold">Price in your currency ({{session["currency"] }}):</span> {{product["price"] * conversion }}</p>
+                                <p class="card-infos"><span class="bold">Quantity:</span> {{ product["quantity"] }}</p>
+                            </div>
+
+                            {% if product["informations"] != "" %}
+                                <p class="text-center card-infos"> <span class="bold">Infos:</span> {{ product["informations"] }}</p>
+                            {% endif %}
+
+                            {# card footer #}
+                            <div class="flex space-between">
+            
+                                {# item edit #}
+                                <form action="/edit" method="get">
+                                    <input name="item_name" type="hidden" value="{{ product['id'] }}">
+                                    <button type="submit" class="edit-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                    </svg> <span>Edit Item</span></button>
+                                </form>
+                                
+                                
+                            {# item link #}
+                                {% if product["link"] != ""%}
+                                    <a class="button-1" href="{{ product['link'] }}" target="_blank">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
+                                            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                        </svg> Product link</a>
+                                {% endif %}
+                                    
+                                {# delete item button #}
+                                <form action="/delete" method="post">
+                                    <input name="item_id" type="hidden" value="={{ product['id'] }}">
+                                    <button type="submit" class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg><span>Delete item</span></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                
+
+
+
+                {% endif %}
+
+            {% endfor %}
+
+
+            <h2 class="text-center">All products</h2>
+            <div class="flex space-around">
+                <h3>USD Total: ${{ total_price }}</h3>
+                <h3>Your currency total: ${{ total_converted }}</h3>
+            </div>
+
+            {% for product in user_products %}
+                {% if product["is_favorite"] == 1 %}
+                    {# render cards for favorite products #}
+                    <div class="card">
+                        <div class="card-body">
+                            {# card header #}
+                            <div class="flex space-between">
+                                <h2>{{ product["brand"] }} - {{ product["name"] }}</h2>
+            
+                                
+                                
+                    
+                            </div>
+            
+                            {# card main #}
+                            <div class="flex space-around">
+                                <p class="card-infos"><span class="bold">Price in USD: </span>{{ product["price"] }}</p>
+                                <p class="card-infos"><span class="bold">Price in your currency ({{session["currency"] }}):</span> {{product["price"] * conversion }}</p>
+                                <p class="card-infos"><span class="bold">Quantity:</span> {{ product["quantity"] }}</p>
+                            </div>
+
+                            {% if product["informations"] != "" %}
+                                <p class="text-center card-infos"> <span class="bold">Infos:</span> {{ product["informations"] }}</p>
+                            {% endif %}
+
+                            {# card footer #}
+                            <div class="flex space-between">
+            
+                                {# item edit #}
+                                <form action="/edit" method="get">
+                                    <input name="item_name" type="hidden" value="{{ product['id'] }}">
+                                    <button type="submit" class="edit-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                    </svg> <span>Edit Item</span></button>
+                                </form>
+                                
+                                
+                            {# item link #}
+                                {% if product["link"] != ""%}
+                                    <a class="button-1" href="{{ product['link'] }}" target="_blank">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
+                                            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                        </svg> Product link</a>
+                                {% endif %}
+                                    
+                                {# delete item button #}
+                                <form action="/delete" method="post">
+                                    <input name="item_id" type="hidden" value="={{ product['id'] }}">
+                                    <button type="submit" class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg><span>Delete item</span></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    {# printar cartão para itens não-favoritos #}
+
+
+                    <div class="card">
+                        <div class="card-body">
+                            {# card header #}
+                            <div class="flex space-between">
+                                <h2>{{ product["brand"] }} - {{ product["name"] }}</h2>
+            
+                                
+                                
+
+                                <form action="/favorite" method="post">
+                                    <input name="item_id" type="hidden" value="{{ product['id'] }}">
+                                    <button type="submit" class="favorite-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-heart" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M8 4.41c1.387-1.425 4.854 1.07 0 4.277C3.146 5.48 6.613 2.986 8 4.412z"/>
+                                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                                    </svg> <span>Add to Favorites</span></button>
+                                </form>
+                    
+                            </div>
+            
+                            {# card main #}
+                            <div class="flex space-around">
+                                <p class="card-infos"><span class="bold">Price in USD: </span>{{ product["price"] }}</p>
+                                <p class="card-infos"><span class="bold">Price in your currency ({{session["currency"] }}):</span> {{product["price"] * conversion }}</p>
+                                <p class="card-infos"><span class="bold">Quantity:</span> {{ product["quantity"] }}</p>
+                            </div>
+
+                            {% if product["informations"] != "" %}
+                                <p class="text-center card-infos"> <span class="bold">Infos:</span> {{ product["informations"] }}</p>
+                            {% endif %}
+
+                            {# card footer #}
+                            <div class="flex space-between">
+            
+                                {# item edit #}
+                                <form action="/edit" method="get">
+                                    <input name="item_name" type="hidden" value="{{ product['id'] }}">
+                                    <button type="submit" class="edit-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                                    </svg> <span>Edit Item</span></button>
+                                </form>
+                                
+                                
+                            {# item link #}
+                                {% if product["link"] != ""%}
+                                    <a class="button-1" href="{{ product['link'] }}" target="_blank">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
+                                            <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                            <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                        </svg> Product link</a>
+                                {% endif %}
+                                    
+                                {# delete item button #}
+                                <form action="/delete" method="post">
+                                    <input name="item_id" type="hidden" value="={{ product['id'] }}">
+                                    <button type="submit" class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg><span>Delete item</span></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                {% endif %}
+
+            {% endfor %}
         
 
-        <!-- vou criar o mesmo card para os favoritos e para todos, só que vai ter tratativas no botão de FAVORITOS (caso seja ==1 vai ter tal icone, e se for ==0 vai ter tal icone), e tratativa no link e nas infos, se eles existirem, então imprime no card -->
-        <div class="card">
-            <div class="card-body">
-                <!-- card header -->
-                <div class="flex space-between">
-                    <h2>OLIGHT - i1R 2 EOS</h2>
-
-                    <!-- defavorite button, trocar o value pelo id do item -->
-                    <form action="/favorite" method="post">
-                        <input name="item_id" type="hidden" value="1">
-                        <button type="submit" class="favorite-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-heart-fill" viewBox="0 0 16 16">
-                            <path d="M2 15.5a.5.5 0 0 0 .74.439L8 13.069l5.26 2.87A.5.5 0 0 0 14 15.5V2a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v13.5zM8 4.41c1.387-1.425 4.854 1.07 0 4.277C3.146 5.48 6.613 2.986 8 4.412z"/>
-                          </svg> <span>Remove Favorite</span></button>
-                    </form>
-          
-                </div>
-
-                <!-- card infos -->
-                <div class="flex space-around">
-                    <p class="card-infos"><span class="bold">Price in USD: </span>17.95</p>
-                    <p class="card-infos"><span class="bold">Price in your currency (BRL):</span> 93,52</p>
-                    <p class="card-infos"><span class="bold">Quantity:</span> 1</p>
-                </div>
-                <p class="text-center card-infos"> <span class="bold">Infos:</span> this lantern can be bought in Amazon, or other similary sites, or even on the original OLight website.</p>
-
-                <!-- card footer -->
-                <div class="flex space-between">
-
-                    <!-- edit button, trocar o value pelo id do item -->
-                    <form action="/edit" method="get">
-                        <input name="item_name" type="hidden" value="OLight">
-                        <button type="submit" class="edit-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                          </svg> <span>Edit Item</span></button>
-                    </form>
-                    
-                    
-                    <!-- product link -->
-                    <a class="button-1" href="https://www.amazon.com/Olight-Rechargeable-Keychain-Battery-Charging/dp/B0814MDZKP?crid=B7IT2Q87IRU6&keywords=Olight%2Bi1R%2B2%2BEOS&qid=1676326691&sprefix=olight%2Bi1r%2B2%2Beos%2Caps%2C125&sr=8-1-spons&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExTVE2R1lTQlpEWjhEJmVuY3J5cHRlZElkPUEwMTk5NDgxMldSTFYzVkdZMDZIUiZlbmNyeXB0ZWRBZElkPUEwNzI5NTE5MU5QMjVNTFpXWDVJMSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU%3D&linkCode=sl1&tag=toddparker-20&linkId=21f5b92c321e688e0b65e65d5adc0ef6&language=en_US&ref_=as_li_ss_tl&th=1" target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
-                        <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
-                        <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
-                      </svg> Product link</a>
-                    
-                    <!-- delete button, colocar value de acordo com o item -->
-                    <form action="/delete" method="post">
-                        <input name="item_id" type="hidden" value="0">
-                        <button type="submit" class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg><span>Delete item</span></button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-         
-
-        <h2 class="text-center">All items</h2>
-        <p>vai renderizar todos os itens</p>
-        <a class="center btn" href="/add">Add new item</a>
-
-        <div class="card">
-            <div class="card-body">
-                <div class="flex space-between">
-                    <h2>Marca - Nome do produto</h2>
-                    
-                    <!-- favorite button, trocar o value pelo id do item -->
-                    <form action="/favorite" method="post">
-                        <input name="item_id" type="hidden" value="0">
-                        <button type="submit" class="favorite-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-heart" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M8 4.41c1.387-1.425 4.854 1.07 0 4.277C3.146 5.48 6.613 2.986 8 4.412z"/>
-                            <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
-                          </svg> <span>Add to Favorites</span></button>
-                    </form>
-
-                    
-                   
-                </div>
-                <div class="flex space-around">
-                    <p class="card-infos">Price in USD: </p>
-                    <p class="card-infos">Price in your currency (BRL): </p>
-                    <p class="card-infos">Quantity: 1</p>
-                    
-                    
-                </div>
-                <div class="flex space-between">
-                    <a class="button-1" href="https://www.amazon.com/Olight-Rechargeable-Keychain-Battery-Charging/dp/B0814MDZKP?crid=B7IT2Q87IRU6&keywords=Olight%2Bi1R%2B2%2BEOS&qid=1676326691&sprefix=olight%2Bi1r%2B2%2Beos%2Caps%2C125&sr=8-1-spons&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUExTVE2R1lTQlpEWjhEJmVuY3J5cHRlZElkPUEwMTk5NDgxMldSTFYzVkdZMDZIUiZlbmNyeXB0ZWRBZElkPUEwNzI5NTE5MU5QMjVNTFpXWDVJMSZ3aWRnZXROYW1lPXNwX2F0ZiZhY3Rpb249Y2xpY2tSZWRpcmVjdCZkb05vdExvZ0NsaWNrPXRydWU%3D&linkCode=sl1&tag=toddparker-20&linkId=21f5b92c321e688e0b65e65d5adc0ef6&language=en_US&ref_=as_li_ss_tl&th=1" target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16">
-                        <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
-                        <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
-                      </svg> Product link</a>
-                    <!-- delete button, colocar value de acordo com o item -->
-                    <form action="/delete" method="post">
-                        <input name="id" type="hidden" value="1">
-                        <button type="submit" class="delete-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/></svg><span>Delete item</span></button>
-                </div>
-                </div>
-            </div>
-        </div>
-
+        {% endif %}       
         
     </div>
 

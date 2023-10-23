@@ -31,10 +31,7 @@ UNSORTED_CURRENCIES = [
             {"iso":"CNH","name": "Chinese renminbi"}, 
             {"iso":"HKD","name": "Hong Kong dollar"}, 
             {"iso":"NZD","name": "New Zealand dollar"}, 
-            {"iso":"MXN","name": "Mexixan peso"},
-            {"iso":"ETH","name": "Ethereum"},
-            {"iso":"BTC","name": "Bitcoin"},
-            {"iso":"XAU","name": "Gold"}
+            {"iso":"MXN","name": "Mexixan peso"}
             ]   
 
 # currencies sorted alphabetically be name value
@@ -126,9 +123,18 @@ def register():
             rows = conn.execute("SELECT * FROM users WHERE user_name = ?", (user_name,)).fetchall()
             conn.close()
 
+
+
             session["user_id"] = rows[0]["id"]
             session["name"] = rows[0]["name"]
             session["currency"] = rows[0]["currency"]
+
+            for currency in CURRENCIES:
+                if currency["iso"] == rows[0]["currency"]:
+                    currency_name = currency["name"]
+
+            session["currency_name"] = currency_name
+
 
             return redirect("/")
 
@@ -174,6 +180,12 @@ def login():
             session["name"] = rows[0]["name"]
             session["currency"] = rows[0]["currency"]
 
+            for currency in CURRENCIES:
+                if currency["iso"] == rows[0]["currency"]:
+                    currency_name = currency["name"]
+                    
+            session["currency_name"] = currency_name
+
 
             return redirect("/")
            
@@ -187,21 +199,8 @@ def login():
 def logout():
     session.clear()
     return redirect("/")
-    # res = requests.get("http://economia.awesomeapi.com.br/json/last/USD-BRL")
-
-    # https://avatars.githubusercontent.com/u/90584577?v=4
-    # <Response [200]>
 
 
-    # res = res.json()
-    # {'USDBRL': {'code': 'USD', 'codein': 'BRL', 'name': 'Dólar Americano/Real Brasileiro', 'high': '5.083', 'low': '5.0196', 'varBid': '-0.008', 'pctChange': '-0.16', 'bid': '5.0508', 'ask': '5.0515', 'timestamp': '1697743091', 'create_date': '2023-10-19 16:18:11'}}
-    
-    
-    # res = res['USDBRL']['high']
-    # 5.083
-
-    # return render_template("message.html")
-    # return redirect("/")
 
 
 @app.route("/add", methods=["POST", "GET"])
@@ -213,7 +212,7 @@ def add():
         item_brand = request.form.get("brand").title()
         item_name = request.form.get("name").title()
         item_price = request.form.get("price")
-        item_infos = request.form.get("item_infos").title()
+        item_infos = request.form.get("item_infos").capitalize()
         item_tax = request.form.get("has_tax")
         item_link = request.form.get("item_link")
         quantity = request.form.get("quantity")
@@ -249,28 +248,68 @@ def add():
 def list():
 
     user_id = session["user_id"]
-    user_name = session["name"]
+    # user_name = session["name"]
     
     conn = get_db_connection()
     user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
     user_products = conn.execute("SELECT * FROM products WHERE user_id = ?", (user_id,)).fetchall()
     conn.close()
 
+    # get user image from github account, if does not have avatar image, so i will render a basic one
     github_username = user[0]["github_username"]
     avatar_url = ""
 
     if not github_username:
         avatar_url = "/static/avatar.png"
-
     else:
         github_response = (requests.get(f"https://api.github.com/users/{github_username}")).json()
         avatar_url = github_response['avatar_url']
+
+
+    # total price of all user's products
+    total_price = 0
+    total_favorites_price = 0
+    product_tax = 1
+
+
+    for product in user_products:
+        # plus 6% tax if has_tax is true (1)
+        if product["has_tax"] == 1:
+            product_tax = 1.06
+        else:
+            product_tax = 1
+
+        # sum total price of all favorite products
+        if product["is_favorite"] == 1:
+            product_price = product["price"] * product["quantity"] * product_tax
+            total_favorites_price += product_price
     
-    if session["user_id"]:
-        return render_template("list.html", session=session, avatar_url=avatar_url)
+        # sum all products
+        
+        product_price = product["price"] * product["quantity"] * product_tax
+        total_price += product_price
+
+    # get currency conversion from api
+    currency_iso = session["currency"]
+    response = requests.get(f"http://economia.awesomeapi.com.br/json/last/USD-{currency_iso}").json()
+    conversion = response[f'USD{currency_iso}']['high']
+
+    total_converted = float(total_price) * float(conversion)
+    total_favorites_converted = float(total_favorites_price) * float(conversion)
+
     
-    else:
-        return redirect("/")
+
+    return render_template("list.html", session=session, 
+                           conversion=float(conversion),
+                           avatar_url=avatar_url, 
+                           user_products=user_products, 
+                           total_price=total_price, 
+                           total_converted=total_converted, 
+                           total_favorites_price=total_favorites_price,
+                           total_favorites_converted=total_favorites_converted
+                           )
+
+
     
 
 
@@ -281,13 +320,28 @@ def favorite():
 
     item_id = int(request.form.get("item_id"))
 
-    if item_id == 1:
+    if not item_id:
+        return render_template("message.html", message="Item couldn't be found")
+    
+    conn = get_db_connection()
+    product_favorite_value = conn.execute("SELECT is_favorite FROM products WHERE id = ?", (item_id,)).fetchall()
+    is_favorite = product_favorite_value[0]['is_favorite']
 
-        # ele já é favorito, então vamos desfavoritar
-        return render_template("message.html", message='Item will be defavorited')
-    elif item_id == 0:
-        # não é favorito, então vamos favoritar
-        return render_template("message.html", message='Item will be favorited')
+    # return render_template("message.html", message=product_favorite_value[0]['is_favorite'])
+
+    # 0 means that the product is not favorite, so change to favorite by updating is_favorite in DB to 1
+    if is_favorite == 0:
+        conn.execute("UPDATE products SET is_favorite = 1 WHERE id = ?", (item_id,))
+        conn.commit()
+        conn.close()
+        return render_template("message.html", message='Item was favorited')
+    
+    # 1 means the product is favorite, so remove from favorites by updating is_favorite in DB to 0
+    elif is_favorite == 1:
+        conn.execute("UPDATE products SET is_favorite = 0 WHERE id = ?", (item_id,))
+        conn.commit()
+        conn.close()
+        return render_template("message.html", message='Item was defavorited')
         
     else:
         # deu algum erro, informar na tela
@@ -314,11 +368,7 @@ def delete():
     else:
         # delete form the database the selected item, with the id we got
         pass
-        return render_template("message.html", message='item deleted')
-
-
-
-
+        return render_template("message.html", message=f'item deleted: {item_id}')
 
 
 @app.route("/account", methods=["POST", "GET"])
@@ -358,18 +408,23 @@ def currency():
     # change currency in the database
     if request.method == "POST":
         
-        currency = request.form.get("currency")
+        currency_iso = request.form.get("currency")
 
-        if currency not in CURRENCIES_ISO:
+        if currency_iso not in CURRENCIES_ISO:
             return render_template("message.html", message="Currency invalid, choose one in the select field!")
         
         else:
             conn = get_db_connection()
-            conn.execute("UPDATE users SET currency = ? WHERE id = ?", (currency, user_id,))
+            conn.execute("UPDATE users SET currency = ? WHERE id = ?", (currency_iso, user_id,))
             conn.commit()
             conn.close()
 
-            session["currency"] = currency
+            for currency in CURRENCIES:
+                if currency["iso"] == currency_iso:
+                    currency_name = currency["name"]
+
+            session["currency_name"] = currency_name
+            session["currency"] = currency_iso
 
 
         return render_template("message.html", message="Currency changed")

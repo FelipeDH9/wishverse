@@ -28,6 +28,11 @@ label {
     padding-bottom: 5px;
 }
 
+/* center all elements in the middle of the page */
+main {
+    margin-top: auto;
+}
+
 .bold {
     font-weight: bold;
 }
