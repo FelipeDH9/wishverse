@@ -355,6 +355,9 @@ label {
 .alert-danger > button {
     background-color: #f8d7da;
 }
+.alert-danger {
+    font-weight: bold;
+}
 
 .alert-success > button {
     background-color: #d1e7dd;

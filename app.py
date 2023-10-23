@@ -40,6 +40,10 @@ CURRENCIES = sorted(UNSORTED_CURRENCIES, key=lambda x: x['name'])
 # list of currencies iso codes 
 CURRENCIES_ISO = [currency['iso'] for currency in CURRENCIES]
 
+def money_format(value):
+    return f"${value:,.2f}"
+
+app.jinja_env.filters["money_format"] = money_format
 
 @app.after_request
 def after_request(response):
@@ -206,7 +210,7 @@ def login():
 @login_required
 def logout():
     session.clear()
-    flash("Logout", "success")
+    flash("Logout", "danger")
     return redirect("/")
 
 
@@ -305,8 +309,10 @@ def list():
     response = requests.get(f"http://economia.awesomeapi.com.br/json/last/USD-{currency_iso}").json()
     conversion = response[f'USD{currency_iso}']['high']
 
-    total_converted = float(total_price) * float(conversion)
-    total_favorites_converted = float(total_favorites_price) * float(conversion)
+    plus_tax_conversion = 1.02 # tax in conversion because of the variability
+    plus_tax = 1.02 # tax goes to 9%
+    total_converted = float(total_price) * float(conversion) * plus_tax_conversion
+    total_favorites_converted = float(total_favorites_price) * float(conversion) * plus_tax_conversion
 
     
 
@@ -314,10 +320,13 @@ def list():
                            conversion=float(conversion),
                            avatar_url=avatar_url, 
                            user_products=user_products, 
-                           total_price=total_price, 
-                           total_converted=total_converted, 
-                           total_favorites_price=total_favorites_price,
-                           total_favorites_converted=total_favorites_converted
+                           total_price= total_price * plus_tax, 
+                           total_converted=total_converted * plus_tax_conversion, 
+                           total_favorites_price=total_favorites_price * plus_tax,
+                           total_favorites_converted=total_favorites_converted * plus_tax_conversion,
+                           plus_tax_conversion=plus_tax_conversion,
+                           product_tax=product_tax,
+                           plus_tax=plus_tax
                            )
  
 
