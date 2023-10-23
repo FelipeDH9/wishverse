@@ -333,6 +333,41 @@ label {
     /* height: 3rem; */
 }
 
+
+/* ALERTS */
+.alert {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+    margin-top: 2rem;
+	
+}
+
+.alert > button {
+	border: 0px;
+	padding: 0px;
+}
+
+.alert-warning > button {
+    background-color: #fff3cd;
+}
+
+.alert-danger > button {
+    background-color: #f8d7da;
+}
+
+.alert-success > button {
+    background-color: #d1e7dd;
+}
+
+
+.alert > button > span {
+	color: black;
+	font-size: 2rem;
+	padding: 0px;
+	line-height: 2rem;
+}
+
 /* RESPONSIVE */
 @media (max-width: 767px){
     /* REGISTER */

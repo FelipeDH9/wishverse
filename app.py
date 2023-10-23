@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash
 import sqlite3
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -59,7 +59,6 @@ def login_required(f):
     return decorated_function
 
 
-
 @app.route("/")
 @login_required
 def index():
@@ -97,19 +96,23 @@ def register():
         
         # check if fields were filled
         if not name or not last_name or not user_name or not password or not confirmation or not city or not state or not country:
-            return render_template("message.html", message="Please fill all fields to register!")
+            flash("Please fill all fields to register!", "warning")
+            return render_template("register.html")
         
         # check if user already exists
         elif len(db_users) != 0:
-            return render_template("message.html", message="User name already exists!")
+            flash("User name already exists!", "warning")
+            return render_template("register.html")
 
         # check if passwords match
         elif password != confirmation:
-            return render_template("message.html", message="Passwords do not match, please try again!")
+            flash("Passwords do not match, please try again!", "warning")
+            return render_template("register.html")
 
         # validate if currency exists
         elif currency not in CURRENCIES_ISO:
-            return render_template("message.html", message="Currency not valid, please choose one in the select field!")
+            flash("Currency not valid, please choose one in the select field!", "warning")
+            return render_template("register.html")
         
         # if everything is fine
         else:
@@ -135,7 +138,7 @@ def register():
 
             session["currency_name"] = currency_name
 
-
+            flash(f"New user ({user_name}) registred", "success")
             return redirect("/")
 
 
@@ -156,11 +159,13 @@ def login():
 
         # Ensure username was submitted
         if not user_name:
-            return render_template("message.html", message="Username must be provided!")
+            flash("Username must be provided!", "warning")
+            return redirect("/login")
 
         # Ensure password was submitted
         elif not password:
-            return render_template("message.html", message="Password must be provided!")
+            flash("Password must be provided!", "warning")
+            return redirect("/login")
             
         # Query database for username
         conn = get_db_connection()
@@ -168,11 +173,14 @@ def login():
         conn.close()
 
         if len(rows) != 1:
-            return render_template("message.html", message="User do not exist, please register")
+            flash("User do not exist, please register!", "warning")
+            return render_template("register.html")
         
         # check if password saved in DB is equal to password provided
         elif not check_password_hash(rows[0]["hash"], password):
-            return render_template("message.html", message="Incorrect password")
+            flash("Incorrect password!", "danger")
+            return redirect("/login")
+
 
         else:
 
@@ -186,7 +194,7 @@ def login():
                     
             session["currency_name"] = currency_name
 
-
+            flash(f"{user_name} login", "success")
             return redirect("/")
            
 
@@ -198,9 +206,8 @@ def login():
 @login_required
 def logout():
     session.clear()
+    flash("Logout", "success")
     return redirect("/")
-
-
 
 
 @app.route("/add", methods=["POST", "GET"])
@@ -221,13 +228,16 @@ def add():
 
 
         if not item_brand or not item_name or not item_price or not item_tax:
-            return render_template("message.html", message="Please fill all fileds with *")
+            flash("Please fill all fileds with *", "warning")
+            return redirect("/add")
         
         elif not item_price.isdigit() or float(item_price) <= 0:
-            return render_template("message.html", message="Price must be a real positive number")
+            flash("Price must be a real positive number", "warning")
+            return redirect("/add")
         
         elif not quantity.isdigit() or int(quantity) <= 0:
-            return render_template("message.html", message="Quantity must be a integer positive number")
+            flash("Quantity must be a integer positive number", "warning")
+            return redirect("/add")
 
         else:
             conn = get_db_connection()
@@ -236,7 +246,8 @@ def add():
             conn.commit()
             conn.close()
 
-        return render_template("message.html", message="Item added")
+        flash(f"{item_name} added to your list", "success")
+        return redirect("/list")
     
     
     else: # GET
@@ -308,12 +319,8 @@ def list():
                            total_favorites_price=total_favorites_price,
                            total_favorites_converted=total_favorites_converted
                            )
+ 
 
-
-    
-
-
-# TODO
 @app.route("/favorite", methods=["POST"])
 @login_required
 def favorite():
@@ -321,46 +328,40 @@ def favorite():
     item_id = int(request.form.get("item_id"))
 
     if not item_id:
-        return render_template("message.html", message="Item couldn't be found")
+        flash("Product could not be found, try another one!", "danger")
+        return redirect("/list")
     
     conn = get_db_connection()
-    product_favorite_value = conn.execute("SELECT is_favorite FROM products WHERE id = ?", (item_id,)).fetchall()
-    is_favorite = product_favorite_value[0]['is_favorite']
-
-    # return render_template("message.html", message=product_favorite_value[0]['is_favorite'])
+    product_infos = conn.execute("SELECT * FROM products WHERE id = ?", (item_id,)).fetchall()
+    is_favorite = product_infos[0]['is_favorite']
+    product_name = product_infos[0]['name']
+    product_brand = product_infos[0]['brand']
 
     # 0 means that the product is not favorite, so change to favorite by updating is_favorite in DB to 1
     if is_favorite == 0:
         conn.execute("UPDATE products SET is_favorite = 1 WHERE id = ?", (item_id,))
         conn.commit()
         conn.close()
-        return render_template("message.html", message='Item was favorited')
+        flash(f"{product_brand} - {product_name} added to favorites!", "success")
+        return redirect("/list")
     
     # 1 means the product is favorite, so remove from favorites by updating is_favorite in DB to 0
     elif is_favorite == 1:
         conn.execute("UPDATE products SET is_favorite = 0 WHERE id = ?", (item_id,))
         conn.commit()
         conn.close()
-        return render_template("message.html", message='Item was defavorited')
+        flash(f"{product_brand} - {product_name} removed from favorites!", "success")
+        return redirect("/list")
         
     else:
-        # deu algum erro, informar na tela
-        return render_template("message.html", message="Internal error")
-
-    
-    # if not item_id:
-    #     return render_template("message.html", message="Item couldn't be favorited")
-    # else:
-    #     # chenge to one in the database the is_favorite from the selected item
-    #     pass
-    #     return render_template("message.html", message='item added to favorites')
-
-
-
-# TODO
+        flash("Internal error! Please try again.", "danger")
+        return redirect("/list")
+  
+# TODO A POPUP TO CONFIRM DELETE PRODUCT ACTION
 @app.route("/delete", methods=["POST"])
 @login_required
 def delete():
+
     item_id = request.form.get("item_id")
     
     if not item_id:
@@ -370,7 +371,7 @@ def delete():
         pass
         return render_template("message.html", message=f'item deleted: {item_id}')
 
-
+# TODO
 @app.route("/account", methods=["POST", "GET"])
 @login_required
 def account():
@@ -395,9 +396,6 @@ def account():
     # return redirect("/")
 
 
-
-
-    
 @app.route("/currency", methods = ["POST", "GET"])
 @login_required
 def currency():
@@ -411,7 +409,8 @@ def currency():
         currency_iso = request.form.get("currency")
 
         if currency_iso not in CURRENCIES_ISO:
-            return render_template("message.html", message="Currency invalid, choose one in the select field!")
+            flash("Currency invalid, choose one in the select field!", "danger")
+            return redirect("/currency")
         
         else:
             conn = get_db_connection()
@@ -426,14 +425,14 @@ def currency():
             session["currency_name"] = currency_name
             session["currency"] = currency_iso
 
-
-        return render_template("message.html", message="Currency changed")
+        flash(f"Currency changed to {currency_iso} ({currency_name})", "success")
+        return redirect("/list")
     
 
     else: #GET
         return render_template("currency.html", currencies=CURRENCIES)
 
-
+# TODO
 @app.route("/edit", methods = ["POST", "GET"])
 @login_required
 def change():
@@ -464,8 +463,3 @@ def read():
 
 if __name__ == '__main__':
     app.run()
-
-
-
-# flask --app app.py --debug run
-
