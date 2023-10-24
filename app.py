@@ -43,7 +43,12 @@ CURRENCIES_ISO = [currency['iso'] for currency in CURRENCIES]
 def money_format(value):
     return f"${value:,.2f}"
 
+def currency_format(value):
+    return f"{value:,.4f}"
+
 app.jinja_env.filters["money_format"] = money_format
+app.jinja_env.filters["currency_format"] = currency_format
+
 
 @app.after_request
 def after_request(response):
@@ -83,16 +88,16 @@ def register():
 
     if request.method == "POST":
 
-        name = request.form.get("name").title()
-        last_name = request.form.get("last_name").title()
-        user_name = request.form.get("user_name")
-        github = request.form.get("github")
-        password = request.form.get("password")
-        confirmation = request.form.get("confirmation")
-        city = request.form.get("city").title()
-        state = request.form.get("state").title()
-        country = request.form.get("country").title()
-        currency = request.form.get("currency")
+        name = request.form.get("name").title().strip()
+        last_name = request.form.get("last_name").title().strip()
+        user_name = request.form.get("user_name").strip()
+        github = request.form.get("github").strip()
+        password = request.form.get("password").strip()
+        confirmation = request.form.get("confirmation").strip()
+        city = request.form.get("city").title().strip()
+        state = request.form.get("state").title().strip()
+        country = request.form.get("country").title().strip()
+        currency = request.form.get("currency").strip()
 
         # search DB for user_name provided
         conn = get_db_connection()
@@ -158,8 +163,8 @@ def login():
         # Forget any user_id
         session.clear()
 
-        user_name = request.form.get("user_name")
-        password = request.form.get("password")
+        user_name = request.form.get("user_name").strip()
+        password = request.form.get("password").strip()
 
         # Ensure username was submitted
         if not user_name:
@@ -198,7 +203,7 @@ def login():
                     
             session["currency_name"] = currency_name
 
-            flash(f"{user_name} login", "success")
+            # flash(f"{user_name} login", "success")
             return redirect("/")
            
 
@@ -220,18 +225,17 @@ def add():
 
     if request.method == "POST":
 
-        item_brand = request.form.get("brand").title()
-        item_name = request.form.get("name").title()
+        item_brand = request.form.get("brand").title().strip()
+        item_name = request.form.get("name").title().strip()
         item_price = request.form.get("price")
-        item_infos = request.form.get("item_infos").capitalize()
-        item_tax = request.form.get("has_tax")
-        item_link = request.form.get("item_link")
-        quantity = request.form.get("quantity")
+        item_infos = request.form.get("item_infos").capitalize().strip()
+        item_link = request.form.get("item_link").strip()
+        quantity = request.form.get("quantity").strip()
 
         user_id = session["user_id"]
 
 
-        if not item_brand or not item_name or not item_price or not item_tax:
+        if not item_brand or not item_name or not item_price:
             flash("Please fill all fileds with *", "warning")
             return redirect("/add")
         
@@ -245,7 +249,7 @@ def add():
 
         else:
             conn = get_db_connection()
-            conn.execute("INSERT INTO products(name, brand, informations, has_tax, link, price, user_id, quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (item_name, item_brand, item_infos, item_tax, item_link, item_price, user_id, quantity))
+            conn.execute("INSERT INTO products(name, brand, informations, link, price, user_id, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)", (item_name, item_brand, item_infos, item_link, item_price, user_id, quantity))
             
             conn.commit()
             conn.close()
@@ -263,7 +267,6 @@ def add():
 def list():
 
     user_id = session["user_id"]
-    # user_name = session["name"]
     
     conn = get_db_connection()
     user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
@@ -284,16 +287,10 @@ def list():
     # total price of all user's products
     total_price = 0
     total_favorites_price = 0
-    product_tax = 1
-
+    product_tax = 1.08
 
     for product in user_products:
-        # plus 6% tax if has_tax is true (1)
-        if product["has_tax"] == 1:
-            product_tax = 1.06
-        else:
-            product_tax = 1
-
+        
         # sum total price of all favorite products
         if product["is_favorite"] == 1:
             product_price = product["price"] * product["quantity"] * product_tax
@@ -309,10 +306,9 @@ def list():
     response = requests.get(f"http://economia.awesomeapi.com.br/json/last/USD-{currency_iso}").json()
     conversion = response[f'USD{currency_iso}']['high']
 
-    plus_tax_conversion = 1.02 # tax in conversion because of the variability
-    plus_tax = 1.02 # tax goes to 9%
-    total_converted = float(total_price) * float(conversion) * plus_tax_conversion
-    total_favorites_converted = float(total_favorites_price) * float(conversion) * plus_tax_conversion
+    plus_safety_margin = 1.029 # safety margin in conversion because of the variability
+    total_converted = float(total_price) * float(conversion) * plus_safety_margin
+    total_favorites_converted = float(total_favorites_price) * float(conversion) * plus_safety_margin
 
     
 
@@ -320,13 +316,12 @@ def list():
                            conversion=float(conversion),
                            avatar_url=avatar_url, 
                            user_products=user_products, 
-                           total_price= total_price * plus_tax, 
-                           total_converted=total_converted * plus_tax_conversion, 
-                           total_favorites_price=total_favorites_price * plus_tax,
-                           total_favorites_converted=total_favorites_converted * plus_tax_conversion,
-                           plus_tax_conversion=plus_tax_conversion,
-                           product_tax=product_tax,
-                           plus_tax=plus_tax
+                           total_price= total_price, 
+                           total_converted=total_converted, 
+                           total_favorites_price=total_favorites_price,
+                           total_favorites_converted=total_favorites_converted,
+                           plus_safety_margin=plus_safety_margin,
+                           product_tax=product_tax
                            )
  
 
@@ -445,25 +440,90 @@ def currency():
 @app.route("/edit", methods = ["POST", "GET"])
 @login_required
 def change():
-    # change  infos in the database for that user
+
     if request.method == "POST":
 
-        item_brand = request.form.get("brand")
-        item_name = request.form.get("name")
-        item_price = request.form.get("price")
-        item_infos = request.form.get("item_infos")
-        item_tax = request.form.get("has_tax")
-        item_link = request.form.get("item_link")
+        item_id = request.form.get("item_id")
 
-        # UDPATE IN DATABASE
+        item_brand = request.form.get("brand").title().strip()
+        item_name = request.form.get("name").title().strip()
+        item_price = request.form.get("price")  
+        item_infos = request.form.get("item_infos").capitalize().strip()
+        item_link = request.form.get("item_link").strip()
+        item_quantity = request.form.get("quantity").strip()
 
+        conn = get_db_connection()
+        product_before = conn.execute("SELECT * FROM products WHERE id = ?", (item_id,)).fetchall()
+        changes = 0
+    
+  
+        # if item_price and not item_price.isdigit() or float(item_price) <= 0:
+        #     flash("Price must be a real positive number", "warning")
+        #     return redirect("/list")
+        
+        # elif item_quantity and not item_quantity.isdigit() or int(item_quantity) <= 0:
+        #     flash("Quantity must be a integer positive number", "warning")
+        #     return redirect("/list")
+        # 
+        # elif not item_price.isdigit() or float(item_price) <= 0:
+        
+
+        if item_brand and item_brand != product_before[0]['brand']:
+            conn.execute("UPDATE products SET brand = ? WHERE id = ?", (item_brand, item_id,))          
+            changes += 1
+            
+
+        if item_name and item_name != product_before[0]['name']:
+            conn.execute("UPDATE products SET name = ? WHERE id = ?", (item_name, item_id,))
+            changes += 1
+
+
+        # if item_price and item_price != product_before[0]['price']:
+
+        #     if not item_price.isdigit() or float(item_price) <= 0:
+        #         flash("Price must be positive float number", "danger")
+        #         return redirect("/edit")
+        #     else:
+        #         conn.execute("UPDATE products SET price = ? WHERE id = ?", (item_price, item_id,))
+        #         changes += 1
+        if item_price and item_price != product_before[0]['price'] and item_price.isdigit() and float(item_price) > 0:
+            conn.execute("UPDATE products SET quantity = ? WHERE id = ?", (item_quantity, item_id,))
+            changes += 1
+
+
+        if item_infos and item_infos != product_before[0]['informations']:
+            conn.execute("UPDATE products SET informations = ? WHERE id = ?", (item_infos, item_id,))
+            changes += 1          
+
+
+        if item_link and item_link != product_before[0]['link']:
+            conn.execute("UPDATE products SET link = ? WHERE id = ?", (item_link, item_id,))
+            changes += 1
+
+        if item_quantity and item_quantity != product_before[0]['quantity'] and item_quantity.isdigit() and int(item_quantity) > 0:
+            conn.execute("UPDATE products SET quantity = ? WHERE id = ?", (item_quantity, item_id,))
+            changes += 1
+                    
+
+
+        if changes > 0:
+            flash(f"{product_before[0]['brand']} - {product_before[0]['name']} edited!", "success")
+            
+        else:
+            flash(f"No changes in {product_before[0]['brand']} - {product_before[0]['name']}", "warning")
+
+        conn.commit()
+        conn.close()
         return redirect("/list")
 
     else: #GET
-        item_name = request.args.get("item_name")
-        return render_template("edit.html", item_name=item_name)
-        # return render_template("message.html", message="Infos changed")
 
+        item_id = request.args.get("item_id")
+        conn = get_db_connection()
+        product = conn.execute("SELECT * FROM products WHERE id = ?", (item_id,)).fetchall()
+        conn.close()
+
+        return render_template("edit.html", product=product)    
 
 @app.route("/read")
 def read():
