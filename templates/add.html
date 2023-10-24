@@ -1,60 +1,105 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block title%} Add Item{% endblock%} {% block main
+%} {% for category, message in get_flashed_messages(with_categories=true) %}
 
-{% block title%} Add Item{% endblock%}
+<div
+  class="alert alert-{{ category }} alert-dismissible fade show"
+  role="alert"
+>
+  {{ message }}
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
 
-{% block main %}
-    {% for category, message in get_flashed_messages(with_categories=true) %}
-            
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    {% endfor %}
+<h1 class="text-center">Add items to your list</h1>
+<h5 class="text-center">Fields with * on it are required</h5>
 
-    <h1 class="text-center">Add items to your list</h1>
-    <h5 class="text-center">Fields with * on it are required</h5>
+<form action="/add" method="post">
+  <div class="row">
+    <div class="col">
+      <label for="brand">Item Brand *</label>
+      <input
+        autofocus
+        class="form-control"
+        id="brand"
+        name="brand"
+        placeholder="E.g., Samsung"
+        type="text"
+      />
+    </div>
+    <div class="col">
+      <label for="name">Item Name *</label>
+      <input
+        class="form-control"
+        id="name"
+        name="name"
+        placeholder="E.g., Galaxy S23"
+        type="text"
+      />
+    </div>
+  </div>
 
-    <form action="/add" method="post">
+  <div class="row">
+    <div class="col">
+      <label for="price">Item Price *</label>
+      <input
+        class="form-control"
+        id="price"
+        name="price"
+        placeholder="E.g., 799.99"
+        type="number"
+        min="0"
+      />
+    </div>
 
-        <div class="row">
-            <div class="col">
-                <label for="brand">Item Brand *</label>
-                <input autofocus class="form-control" id="brand" name="brand" placeholder="E.g., Samsung" type="text">
-            </div>
-            <div class="col">
-                <label for="name">Item Name *</label>
-                <input class="form-control" id="name" name="name" placeholder="E.g., Galaxy S23" type="text">
-            </div>
-        </div>
+    <div class="col">
+      <label for="quantity">Quantity wanted *</label>
+      <input
+        class="form-control"
+        id="quantity"
+        name="quantity"
+        placeholder="E.g., 2"
+        type="number"
+        min="0"
+      />
+    </div>
+  </div>
 
+  <label for="item_link">Item link</label>
+  <input
+    class="form-control"
+    id="item_link"
+    name="item_link"
+    placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..."
+    type="text"
+  />
 
-        <div class="row">
-            <div class="col">
-                <label for="price">Item Price *</label>
-                <input class="form-control" id="price" name="price" placeholder="E.g., 799.99" type="number" min="0">
-            </div>
+  <label for="item_infos">Item informations</label>
+  <input
+    class="form-control"
+    id="item_infos"
+    name="item_infos"
+    placeholder="E.g., Can be found in Samsung stores, or another sites"
+    type="text"
+  />
 
-            <div class="col">
-                <label for="quantity">Quantity wanted *</label>
-                <input class="form-control" id="quantity" name="quantity" placeholder="E.g., 2" type="number" min="0">
-            </div>
-
-
-        </div>
-
-        <label for="item_link">Item link</label>
-        <input class="form-control" id="item_link" name="item_link" placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..." type="text">
-
-        <label for="item_infos">Item informations</label>
-        <input class="form-control" id="item_infos" name="item_infos" placeholder="E.g., Can be found in Samsung stores, or another sites" type="text">
-
-
-        <button type="submit" class="btn btn-primary"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bag-plus-fill" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5v-.5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0zM8.5 8a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V12a.5.5 0 0 0 1 0v-1.5H10a.5.5 0 0 0 0-1H8.5V8z"/>
-          </svg> Add new product</button>
-
-    </form>
+  <button type="submit" class="btn btn-primary">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      fill="currentColor"
+      class="bi bi-bag-plus-fill"
+      viewBox="0 0 16 16"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M10.5 3.5a2.5 2.5 0 0 0-5 0V4h5v-.5zm1 0V4H15v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V4h3.5v-.5a3.5 3.5 0 1 1 7 0zM8.5 8a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V12a.5.5 0 0 0 1 0v-1.5H10a.5.5 0 0 0 0-1H8.5V8z"
+      />
+    </svg>
+    Add new product
+  </button>
+</form>
 
 {% endblock %}

@@ -1,57 +1,103 @@
-{% extends "layout.html" %}
+{% extends "layout.html" %} {% block title%}: {{product[0]['brand']}} - {{
+product[0]['name'] }}{% endblock%} {% block main %}
+<h1 class="text-center">
+  Edit: {{product[0]['brand']}} - {{ product[0]['name'] }}
+</h1>
+<h5 class="text-center">Edit just the fields you want, nothing is required</h5>
 
-{% block title%}: {{product[0]['brand']}} - {{ product[0]['name'] }}{% endblock%}
+<form action="/edit" method="post">
+  <div class="row">
+    <div class="col">
+      <label for="brand">Product Brand</label>
+      <input
+        autofocus
+        class="form-control"
+        id="brand"
+        name="brand"
+        placeholder="E.g., {{ product[0]['brand'] }}"
+        type="text"
+      />
+    </div>
+    <div class="col">
+      <label for="name">Product Name</label>
+      <input
+        class="form-control"
+        id="name"
+        name="name"
+        placeholder="E.g., {{ product[0]['name'] }}"
+        type="text"
+      />
+    </div>
+  </div>
 
-{% block main %}
-    <h1 class="text-center">Edit: {{product[0]['brand']}} - {{ product[0]['name'] }}</h1>
-    <h5 class="text-center">Edit just the fields you want, nothing is required</h5>
+  <div class="row">
+    <div class="col">
+      <label for="price">Product Price</label>
+      <input
+        class="form-control"
+        id="price"
+        name="price"
+        placeholder="E.g., {{ product[0]['price'] }}"
+        type="number"
+        min="0"
+      />
+    </div>
 
-    <form action="/edit" method="post">
+    <div class="col">
+      <label for="quantity">Product Quantity</label>
+      <input
+        class="form-control"
+        id="quantity"
+        name="quantity"
+        placeholder="E.g., {{ product[0]['quantity'] }}"
+        type="number"
+        min="0"
+      />
+    </div>
+  </div>
 
-        <div class="row">
-            <div class="col">
-                <label for="brand">Product Brand</label>
-                <input autofocus class="form-control" id="brand" name="brand" placeholder="E.g., {{ product[0]['brand'] }}" type="text">
-            </div>
-            <div class="col">
-                <label for="name">Product Name</label>
-                <input class="form-control" id="name" name="name" placeholder="E.g., {{ product[0]['name'] }}" type="text">
-            </div>
-        </div>
+  <label for="item_link">Product link</label>
+  {% if product[0]['link'] %}
+  <input
+    class="form-control"
+    id="item_link"
+    name="item_link"
+    placeholder="E.g., {{ product[0]['link'] }}"
+    type="text"
+  />
+  {% else %}
+  <input
+    class="form-control"
+    id="item_link"
+    name="item_link"
+    placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..."
+    type="text"
+  />
 
+  {% endif %}
 
-        <div class="row">
-            <div class="col">
-                <label for="price">Product Price</label>
-                <input class="form-control" id="price" name="price" placeholder="E.g., {{ product[0]['price'] }}" type="number" min="0">
-            </div>
+  <label for="item_infos">Product informations</label>
 
-            <div class="col">
-                <label for="quantity">Product Quantity</label>
-                <input class="form-control" id="quantity" name="quantity" placeholder="E.g., {{ product[0]['quantity'] }}" type="number" min="0">
-            </div>
+  {% if product[0]['informations'] %}
+  <input
+    class="form-control"
+    id="item_infos"
+    name="item_infos"
+    placeholder="E.g., {{ product[0]['informations'] }}"
+    type="text"
+  />
+  {% else %}
+  <input
+    class="form-control"
+    id="item_infos"
+    name="item_infos"
+    placeholder="E.g., Some additional informations about the product that you want to save"
+    type="text"
+  />
+  {% endif %}
 
-        </div>
-
-        <label for="item_link">Product link</label>
-        {% if product[0]['link'] %}
-            <input class="form-control" id="item_link" name="item_link" placeholder="E.g., {{ product[0]['link'] }}" type="text">
-        {% else %}
-            <input class="form-control" id="item_link" name="item_link" placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..." type="text">
-
-        {% endif %}
-
-        <label for="item_infos">Product informations</label>
-
-        {% if product[0]['informations'] %}
-            <input class="form-control" id="item_infos" name="item_infos" placeholder="E.g., {{ product[0]['informations'] }}" type="text">
-        {% else %}
-            <input class="form-control" id="item_infos" name="item_infos" placeholder="E.g., Some additional informations about the product that you want to save" type="text">
-        {% endif %}
-
-        <input name="item_id" type="hidden" value="{{ product[0]['id'] }}">
-        <button type="submit" class="btn btn-primary">Submit</button>
-
-    </form>
+  <input name="item_id" type="hidden" value="{{ product[0]['id'] }}" />
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 
 {% endblock %}
