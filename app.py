@@ -249,46 +249,49 @@ def logout():
 @login_required
 def add():
     if request.method == "POST":
-        item_brand = request.form.get("brand").title().strip()
-        item_name = request.form.get("name").title().strip()
-        item_price = request.form.get("price")
-        item_infos = request.form.get("item_infos").capitalize().strip()
-        item_link = request.form.get("item_link").strip()
-        quantity = request.form.get("quantity").strip()
+        product_brand = request.form.get("brand").title().strip()
+        product_name = request.form.get("name").title().strip()
+        product_price = request.form.get("price")
+        product_infos = request.form.get("infos").capitalize().strip()
+        product_link = request.form.get("link").strip()
+        product_quantity = request.form.get("quantity").strip()
 
         user_id = session["user_id"]
 
-        if not item_brand or not item_name or not item_price:
+        if not product_brand or not product_name or not product_price:
             flash("Please fill all fileds with *", "warning")
             return redirect("/add")
 
-        elif not item_price.isdigit() or float(item_price) <= 0:
+        elif not product_price.isdigit() or float(product_price) <= 0:
             flash("Price must be a real positive number", "warning")
             return redirect("/add")
 
-        elif not quantity.isdigit() or int(quantity) <= 0:
+        elif not product_quantity.isdigit() or int(product_quantity) <= 0:
             flash("Quantity must be a integer positive number", "warning")
             return redirect("/add")
 
         else:
+            product_price = float(product_price)
+            product_quantity = int(product_quantity)
+
             conn = get_db_connection()
             conn.execute(
                 "INSERT INTO products(name, brand, informations, link, price, user_id, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (
-                    item_name,
-                    item_brand,
-                    item_infos,
-                    item_link,
-                    item_price,
+                    product_name,
+                    product_brand,
+                    product_infos,
+                    product_link,
+                    product_price,
                     user_id,
-                    quantity,
+                    product_quantity,
                 ),
             )
 
             conn.commit()
             conn.close()
 
-        flash(f"{item_name} added to your list", "success")
+        flash(f"{product_name} added to your list", "success")
         return redirect("/list")
 
     else:  # GET
@@ -327,7 +330,7 @@ def list():
     for product in user_products:
         # sum total price of all favorite products
         if product["is_favorite"] == 1:
-            product_price = product["price"] * product["quantity"] * product_tax
+            product_price = float(product["price"]) * float(product["quantity"]) * product_tax
             total_favorites_price += product_price
 
         # sum all products
@@ -366,15 +369,15 @@ def list():
 @app.route("/favorite", methods=["POST"])
 @login_required
 def favorite():
-    item_id = int(request.form.get("item_id"))
+    product_id = int(request.form.get("product_id"))
 
-    if not item_id:
+    if not product_id:
         flash("Product could not be found, try another one!", "danger")
         return redirect("/list")
 
     conn = get_db_connection()
     product_infos = conn.execute(
-        "SELECT * FROM products WHERE id = ?", (item_id,)
+        "SELECT * FROM products WHERE id = ?", (product_id,)
     ).fetchall()
     is_favorite = product_infos[0]["is_favorite"]
     product_name = product_infos[0]["name"]
@@ -382,7 +385,7 @@ def favorite():
 
     # 0 means that the product is not favorite, so change to favorite by updating is_favorite in DB to 1
     if is_favorite == 0:
-        conn.execute("UPDATE products SET is_favorite = 1 WHERE id = ?", (item_id,))
+        conn.execute("UPDATE products SET is_favorite = 1 WHERE id = ?", (product_id,))
         conn.commit()
         conn.close()
         flash(f"{product_brand} - {product_name} added to favorites!", "success")
@@ -390,7 +393,7 @@ def favorite():
 
     # 1 means the product is favorite, so remove from favorites by updating is_favorite in DB to 0
     elif is_favorite == 1:
-        conn.execute("UPDATE products SET is_favorite = 0 WHERE id = ?", (item_id,))
+        conn.execute("UPDATE products SET is_favorite = 0 WHERE id = ?", (product_id,))
         conn.commit()
         conn.close()
         flash(f"{product_brand} - {product_name} removed from favorites!", "success")
@@ -405,14 +408,14 @@ def favorite():
 @app.route("/delete", methods=["POST"])
 @login_required
 def delete():
-    item_id = request.form.get("item_id")
+    product_id = request.form.get("product_id")
 
-    if not item_id:
-        return render_template("message.html", message="Item couldn't be deleted")
+    if not product_id:
+        return render_template("message.html", message="product couldn't be deleted")
     else:
-        # delete form the database the selected item, with the id we got
+        # delete form the database the selected product, with the id we got
         pass
-        return render_template("message.html", message=f"item deleted: {item_id}")
+        return render_template("message.html", message=f"product deleted: {product_id}")
 
 
 # TODO
@@ -488,87 +491,89 @@ def currency():
 @login_required
 def change():
     if request.method == "POST":
-        item_id = request.form.get("item_id")
+        product_id = request.form.get("product_id")
 
-        item_brand = request.form.get("brand").title().strip()
-        item_name = request.form.get("name").title().strip()
-        item_price = request.form.get("price")
-        item_infos = request.form.get("item_infos").capitalize().strip()
-        item_link = request.form.get("item_link").strip()
-        item_quantity = request.form.get("quantity").strip()
+        product_brand = request.form.get("brand").title().strip()
+        product_name = request.form.get("name").title().strip()
+        product_price = request.form.get("price")
+        product_infos = request.form.get("infos").capitalize().strip()
+        product_link = request.form.get("link").strip()
+        product_quantity = request.form.get("quantity").strip()
 
         conn = get_db_connection()
         product_before = conn.execute(
-            "SELECT * FROM products WHERE id = ?", (item_id,)
+            "SELECT * FROM products WHERE id = ?", (product_id,)
         ).fetchall()
         changes = 0
 
-        if item_brand and item_brand != product_before[0]["brand"]:
+        if product_brand and product_brand != product_before[0]["brand"]:
             conn.execute(
                 "UPDATE products SET brand = ? WHERE id = ?",
                 (
-                    item_brand,
-                    item_id,
+                    product_brand,
+                    product_id,
                 ),
             )
             changes += 1
 
-        if item_name and item_name != product_before[0]["name"]:
+        if product_name and product_name != product_before[0]["name"]:
             conn.execute(
                 "UPDATE products SET name = ? WHERE id = ?",
                 (
-                    item_name,
-                    item_id,
+                    product_name,
+                    product_id,
                 ),
             )
             changes += 1
 
-        if (
-            item_price
-            and item_price != product_before[0]["price"]
-            and item_price.isdigit()
-            and float(item_price) > 0
-        ):
-            conn.execute(
-                "UPDATE products SET quantity = ? WHERE id = ?",
-                (
-                    item_quantity,
-                    item_id,
-                ),
-            )
-            changes += 1
 
-        if item_infos and item_infos != product_before[0]["informations"]:
+        if product_infos and product_infos != product_before[0]["informations"]:
             conn.execute(
                 "UPDATE products SET informations = ? WHERE id = ?",
                 (
-                    item_infos,
-                    item_id,
+                    product_infos,
+                    product_id,
                 ),
             )
             changes += 1
 
-        if item_link and item_link != product_before[0]["link"]:
+        if product_link and product_link != product_before[0]["link"]:
             conn.execute(
                 "UPDATE products SET link = ? WHERE id = ?",
                 (
-                    item_link,
-                    item_id,
+                    product_link,
+                    product_id,
+                ),
+            )
+            changes += 1
+        
+        if (
+            product_price
+            and product_price != product_before[0]["price"]
+            and product_price.isdigit()
+            and float(product_price) > 0
+        ):
+            
+            conn.execute(
+                "UPDATE products SET price = ? WHERE id = ?",
+                (
+                    product_price,
+                    product_id,
                 ),
             )
             changes += 1
 
         if (
-            item_quantity
-            and item_quantity != product_before[0]["quantity"]
-            and item_quantity.isdigit()
-            and int(item_quantity) > 0
+            product_quantity is not None
+            and product_quantity != product_before[0]["quantity"]
+            and product_quantity.isdigit()
+            and int(product_quantity) > 0
         ):
             conn.execute(
                 "UPDATE products SET quantity = ? WHERE id = ?",
                 (
-                    item_quantity,
-                    item_id,
+                    product_quantity,
+                    product_id,
                 ),
             )
             changes += 1
@@ -590,12 +595,13 @@ def change():
         return redirect("/list")
 
     else:  # GET
-        item_id = request.args.get("item_id")
+        product_id = request.args.get("product_id")
         conn = get_db_connection()
         product = conn.execute(
-            "SELECT * FROM products WHERE id = ?", (item_id,)
+            "SELECT * FROM products WHERE id = ?", (product_id,)
         ).fetchall()
         conn.close()
+        
 
         return render_template("edit.html", product=product)
 

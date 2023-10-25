@@ -13,3 +13,6 @@ flask_session/
 
 
 delete_tables.py
+
+# vscode settings
+.vscode/

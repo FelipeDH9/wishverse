@@ -1,5 +1,8 @@
-{% extends "layout.html" %} {% block title%}: {{product[0]['brand']}} - {{
-product[0]['name'] }}{% endblock%} {% block main %}
+{% extends "layout.html" %} 
+
+{% block title %}: {{product[0]['brand']}} - {{ product[0]['name'] }} {% endblock %} 
+
+{% block main %}
 <h1 class="text-center">
   Edit: {{product[0]['brand']}} - {{ product[0]['name'] }}
 </h1>
@@ -51,52 +54,52 @@ product[0]['name'] }}{% endblock%} {% block main %}
         name="quantity"
         placeholder="E.g., {{ product[0]['quantity'] }}"
         type="number"
-        min="0"
+        min="1"
       />
     </div>
   </div>
 
-  <label for="item_link">Product link</label>
+  <label for="link">Product link</label>
   {% if product[0]['link'] %}
   <input
     class="form-control"
-    id="item_link"
-    name="item_link"
+    id="link"
+    name="link"
     placeholder="E.g., {{ product[0]['link'] }}"
     type="text"
   />
   {% else %}
   <input
     class="form-control"
-    id="item_link"
-    name="item_link"
+    id="link"
+    name="link"
     placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..."
     type="text"
   />
 
   {% endif %}
 
-  <label for="item_infos">Product informations</label>
+  <label for="infos">Product informations</label>
 
   {% if product[0]['informations'] %}
   <input
     class="form-control"
-    id="item_infos"
-    name="item_infos"
+    id="infos"
+    name="infos"
     placeholder="E.g., {{ product[0]['informations'] }}"
     type="text"
   />
   {% else %}
   <input
     class="form-control"
-    id="item_infos"
-    name="item_infos"
+    id="infos"
+    name="infos"
     placeholder="E.g., Some additional informations about the product that you want to save"
     type="text"
   />
   {% endif %}
 
-  <input name="item_id" type="hidden" value="{{ product[0]['id'] }}" />
+  <input name="product_id" type="hidden" value="{{ product[0]['id'] }}" />
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 

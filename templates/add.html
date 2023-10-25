@@ -1,5 +1,6 @@
-{% extends "layout.html" %} {% block title%} Add Item{% endblock%} {% block main
-%} {% for category, message in get_flashed_messages(with_categories=true) %}
+{% extends "layout.html" %} {% block title%} Add Product{% endblock%} {% block
+main %} {% for category, message in get_flashed_messages(with_categories=true)
+%}
 
 <div
   class="alert alert-{{ category }} alert-dismissible fade show"
@@ -12,13 +13,13 @@
 </div>
 {% endfor %}
 
-<h1 class="text-center">Add items to your list</h1>
+<h1 class="text-center">Add Products to your list</h1>
 <h5 class="text-center">Fields with * on it are required</h5>
 
 <form action="/add" method="post">
   <div class="row">
     <div class="col">
-      <label for="brand">Item Brand *</label>
+      <label for="brand">Product Brand *</label>
       <input
         autofocus
         class="form-control"
@@ -29,7 +30,7 @@
       />
     </div>
     <div class="col">
-      <label for="name">Item Name *</label>
+      <label for="name">Product Name *</label>
       <input
         class="form-control"
         id="name"
@@ -42,7 +43,7 @@
 
   <div class="row">
     <div class="col">
-      <label for="price">Item Price *</label>
+      <label for="price">Product Price *</label>
       <input
         class="form-control"
         id="price"
@@ -66,20 +67,20 @@
     </div>
   </div>
 
-  <label for="item_link">Item link</label>
+  <label for="link">Product link</label>
   <input
     class="form-control"
-    id="item_link"
-    name="item_link"
+    id="link"
+    name="link"
     placeholder="E.g., https://www.amazon.com/SAMSUNG-Factory-Unlocked-Smartphone-Adaptive/dp/B0BLP2PY6N/ref=sr_1_1_sspa?crid=6W6R961K0Y77&keyw..."
     type="text"
   />
 
-  <label for="item_infos">Item informations</label>
+  <label for="infos">Product informations</label>
   <input
     class="form-control"
-    id="item_infos"
-    name="item_infos"
+    id="infos"
+    name="infos"
     placeholder="E.g., Can be found in Samsung stores, or another sites"
     type="text"
   />
