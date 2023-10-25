@@ -46,7 +46,13 @@
                                     {{ session["name"] }}
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/account">My Account</a></li>
+                                    <li>
+                                        <form action="/account" method="get">
+                                            <input name="user_id" type="hidden" value="{{ session['user_id'] }}">
+                                            <button type="submit" class="dropdown-item">My Account</button>
+                                        </form>
+                                    </li>
+
                                     <li><a class="dropdown-item" href="/logout">Log Out</a></li>
                                 </ul>
                             </li>

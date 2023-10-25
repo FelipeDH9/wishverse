@@ -101,7 +101,7 @@ def register():
         city = request.form.get("city").title().strip()
         state = request.form.get("state").title().strip()
         country = request.form.get("country").title().strip()
-        currency = request.form.get("currency").strip()
+        currency = request.form.get("currency")
 
         # search DB for user_name provided
         conn = get_db_connection()
@@ -139,7 +139,10 @@ def register():
                 "Currency not valid, please choose one in the select field!", "warning"
             )
             return render_template("register.html")
+        
 
+            
+            
         # if everything is fine
         else:
             hash = generate_password_hash(password)
@@ -161,17 +164,28 @@ def register():
 
             conn.commit()
 
-            rows = conn.execute(
+            user = conn.execute(
                 "SELECT * FROM users WHERE user_name = ?", (user_name,)
             ).fetchall()
             conn.close()
 
-            session["user_id"] = rows[0]["id"]
-            session["name"] = rows[0]["name"]
-            session["currency"] = rows[0]["currency"]
+            session["user_id"] = user[0]["id"]
+            session["name"] = user[0]["name"]
+            session["currency"] = user[0]["currency"]
+                   
+            
+            if not user[0]["github_username"]:
+                session['avatar_url'] = "/static/avatar.png"
+
+            else:
+                github_response = (
+                    requests.get(f"https://api.github.com/users/{user[0]['github_username']}")
+                ).json()
+                session['avatar_url'] = github_response["avatar_url"]
+
 
             for currency in CURRENCIES:
-                if currency["iso"] == rows[0]["currency"]:
+                if currency["iso"] == user[0]["currency"]:
                     currency_name = currency["name"]
 
             session["currency_name"] = currency_name
@@ -205,27 +219,41 @@ def login():
 
         # Query database for username
         conn = get_db_connection()
-        rows = conn.execute(
+        user = conn.execute(
             "SELECT * FROM users WHERE user_name = ?", (user_name,)
         ).fetchall()
         conn.close()
 
-        if len(rows) != 1:
+        if len(user) != 1:
             flash("User do not exist, please register!", "warning")
             return render_template("register.html")
 
         # check if password saved in DB is equal to password provided
-        elif not check_password_hash(rows[0]["hash"], password):
+        elif not check_password_hash(user[0]["hash"], password):
             flash("Incorrect password!", "danger")
             return redirect("/login")
 
+
+
         else:
-            session["user_id"] = rows[0]["id"]
-            session["name"] = rows[0]["name"]
-            session["currency"] = rows[0]["currency"]
+            github_username = user[0]["github_username"]
+            
+            if not github_username:
+                session['avatar_url'] = "/static/avatar.png"
+
+            else:
+                github_response = (
+                    requests.get(f"https://api.github.com/users/{github_username}")
+                ).json()
+                session['avatar_url'] = github_response["avatar_url"]
+
+
+            session["user_id"] = user[0]["id"]
+            session["name"] = user[0]["name"]
+            session["currency"] = user[0]["currency"]
 
             for currency in CURRENCIES:
-                if currency["iso"] == rows[0]["currency"]:
+                if currency["iso"] == user[0]["currency"]:
                     currency_name = currency["name"]
 
             session["currency_name"] = currency_name
@@ -310,18 +338,6 @@ def list():
     ).fetchall()
     conn.close()
 
-    # get user image from github account, if does not have avatar image, so i will render a basic one
-    github_username = user[0]["github_username"]
-    avatar_url = ""
-
-    if not github_username:
-        avatar_url = "/static/avatar.png"
-    else:
-        github_response = (
-            requests.get(f"https://api.github.com/users/{github_username}")
-        ).json()
-        avatar_url = github_response["avatar_url"]
-
     # total price of all user's products
     total_price = 0
     total_favorites_price = 0
@@ -355,7 +371,6 @@ def list():
         "list.html",
         session=session,
         conversion=float(conversion),
-        avatar_url=avatar_url,
         user_products=user_products,
         total_price=total_price,
         total_converted=total_converted,
@@ -369,39 +384,53 @@ def list():
 @app.route("/favorite", methods=["POST"])
 @login_required
 def favorite():
-    product_id = int(request.form.get("product_id"))
+    product_id = request.form.get("product_id")
 
-    if not product_id:
-        flash("Product could not be found, try another one!", "danger")
+    if not product_id or not product_id.isdigit() or int(product_id) <= 0:
+        flash(f"Product {product_id} could not be found , try another one!", "danger")
         return redirect("/list")
 
     conn = get_db_connection()
-    product_infos = conn.execute(
-        "SELECT * FROM products WHERE id = ?", (product_id,)
-    ).fetchall()
-    is_favorite = product_infos[0]["is_favorite"]
-    product_name = product_infos[0]["name"]
-    product_brand = product_infos[0]["brand"]
 
-    # 0 means that the product is not favorite, so change to favorite by updating is_favorite in DB to 1
-    if is_favorite == 0:
-        conn.execute("UPDATE products SET is_favorite = 1 WHERE id = ?", (product_id,))
-        conn.commit()
-        conn.close()
-        flash(f"{product_brand} - {product_name} added to favorites!", "success")
+    # GET ALL USER PRODUCTS ID'S
+    id_counter = conn.execute("SELECT id FROM products WHERE user_id = ?", (session["user_id"],)).fetchall()
+    id_list = []
+    for id in id_counter:
+        id_list.append(id['id'])
+
+    
+    if int(product_id) not in id_list:
+        flash(f"Product {product_id} could not be found {id_list}, try another one!", "danger")
         return redirect("/list")
-
-    # 1 means the product is favorite, so remove from favorites by updating is_favorite in DB to 0
-    elif is_favorite == 1:
-        conn.execute("UPDATE products SET is_favorite = 0 WHERE id = ?", (product_id,))
-        conn.commit()
-        conn.close()
-        flash(f"{product_brand} - {product_name} removed from favorites!", "success")
-        return redirect("/list")
-
+    
     else:
-        flash("Internal error! Please try again.", "danger")
-        return redirect("/list")
+        conn = get_db_connection()
+        product_infos = conn.execute(
+            "SELECT * FROM products WHERE id = ?", (product_id,)
+        ).fetchall()
+        is_favorite = product_infos[0]["is_favorite"]
+        product_name = product_infos[0]["name"]
+        product_brand = product_infos[0]["brand"]
+
+        # 0 means that the product is not favorite, so change to favorite by updating is_favorite in DB to 1
+        if is_favorite == 0:
+            conn.execute("UPDATE products SET is_favorite = 1 WHERE id = ?", (product_id,))
+            conn.commit()
+            conn.close()
+            flash(f"{product_brand} - {product_name} added to favorites!", "success")
+            return redirect("/list")
+
+        # 1 means the product is favorite, so remove from favorites by updating is_favorite in DB to 0
+        elif is_favorite == 1:
+            conn.execute("UPDATE products SET is_favorite = 0 WHERE id = ?", (product_id,))
+            conn.commit()
+            conn.close()
+            flash(f"{product_brand} - {product_name} removed from favorites!", "success")
+            return redirect("/list")
+
+        else:
+            flash("Internal error! Please try again.", "danger")
+            return redirect("/list")
 
 
 # TODO A POPUP TO CONFIRM DELETE PRODUCT ACTION
@@ -410,12 +439,27 @@ def favorite():
 def delete():
     product_id = request.form.get("product_id")
 
-    if not product_id:
-        return render_template("message.html", message="product couldn't be deleted")
+    if not product_id or not product_id.isdigit() or int(product_id) <= 0:
+        flash(f"Product {product_id} could not be found , try another one!", "danger")
+        return redirect("/list")
+
+    conn = get_db_connection()
+
+    # GET ALL USER PRODUCTS ID'S
+    id_counter = conn.execute("SELECT id FROM products WHERE user_id = ?", (session["user_id"],)).fetchall()
+    id_list = []
+    for id in id_counter:
+        id_list.append(id['id'])
+
+    
+    if int(product_id) not in id_list:
+        flash(f"Product {product_id} could not be found {id_list}, try another one!", "danger")
+        return redirect("/list")
+    
     else:
-        # delete form the database the selected product, with the id we got
-        pass
-        return render_template("message.html", message=f"product deleted: {product_id}")
+
+        flash("Fazer popup de confirmação para deletar", "warning")
+        return redirect('/list')  
 
 
 # TODO
@@ -423,7 +467,28 @@ def delete():
 @login_required
 def account():
     if request.method == "POST":
+        user_id = request.form.get("user_id")
+        new_name = request.form.get("name")
+        new_last_name = request.form.get("last_name")
+        new_password = request.form.get("password")
+        new_confirmation = request.form.get("confirmation")
+        new_city = request.form.get("city")
+        new_state = request.form.get("state")
+        new_country = request.form.get("country")
+
         currency = request.form.get("currency")
+
+        if not user_id or user_id < 1:
+            flash("User could not be found", "danger")
+            return redirect("/list")
+        elif user_id > 0:
+            conn = generate_password_hash()
+
+
+        # return render_template("message.html", message=user_id)
+        if new_name and new_name:
+            pass
+        
 
         # validate if currency exists
         if currency not in CURRENCIES_ISO:
@@ -435,17 +500,25 @@ def account():
             return render_template("message.html", message="Currency valid!")
 
     else:  # GET
-        github_response = (
-            requests.get("https://api.github.com/users/felipedh9")
-        ).json()
-        avatar_url = github_response["avatar_url"]
-        if not avatar_url:
-            avatar_url = "#"
+        user_id = request.args.get("user_id")
 
-        return render_template(
-            "account.html", avatar_url=avatar_url, currencies=CURRENCIES
-        )
-    # return redirect("/")
+        # check if the requested id exist, is a positive integer
+        if not user_id or not user_id.isdigit() or int(user_id) <= 0:
+            flash(f"User {user_id} could not be found , try another one!", "danger")
+            return redirect("/list")
+        
+        # check if requested id is equal to id saved in session  
+        elif int(session["user_id"]) != int(user_id):
+            flash(f"User {user_id} could not be found , try another one!", "danger")
+            return redirect("/list")
+        
+        # all fine
+        else:
+            conn = get_db_connection()
+            user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
+            conn.close()
+
+            return render_template("account.html", currencies=CURRENCIES, user=user)
 
 
 @app.route("/currency", methods=["POST", "GET"])
@@ -499,6 +572,11 @@ def change():
         product_infos = request.form.get("infos").capitalize().strip()
         product_link = request.form.get("link").strip()
         product_quantity = request.form.get("quantity").strip()
+        
+        
+        if not product_id or int(product_id) < 1:
+            flash("Product could not be found, try another one!", "danger")
+            return redirect("/list")
 
         conn = get_db_connection()
         product_before = conn.execute(
@@ -596,11 +674,29 @@ def change():
 
     else:  # GET
         product_id = request.args.get("product_id")
+
+        if not product_id or not product_id.isdigit() or int(product_id) <= 0:
+            flash(f"Product {product_id} could not be found , try another one!", "danger")
+            return redirect("/list")
+
         conn = get_db_connection()
-        product = conn.execute(
-            "SELECT * FROM products WHERE id = ?", (product_id,)
-        ).fetchall()
-        conn.close()
+
+        # GET ALL USER PRODUCTS ID'S
+        id_counter = conn.execute("SELECT id FROM products WHERE user_id = ?", (session["user_id"],)).fetchall()
+        id_list = []
+        for id in id_counter:
+            id_list.append(id['id'])
+
+        
+        if int(product_id) not in id_list:
+            flash(f"Product {product_id} could not be found {id_list}, try another one!", "danger")
+            return redirect("/list")
+        
+        else:
+            product = conn.execute(
+                "SELECT * FROM products WHERE id = ?", (product_id,)
+            ).fetchall()
+            conn.close()
         
 
         return render_template("edit.html", product=product)
@@ -609,6 +705,11 @@ def change():
 @app.route("/read")
 def read():
     return render_template("index.html")
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('message.html', message="Page not found, 404"), 404
 
 
 if __name__ == "__main__":

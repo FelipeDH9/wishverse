@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %} My account{% endblock %}
+{% block title %}: Account{% endblock %}
 
 
 {% block main %}
@@ -12,47 +12,57 @@
       </svg> Change your currency conversion at any time</a>
     
     <div class="flex user-flex">
-        <img class="user-image" src="{{ avatar_url }}" alt="GitHub Avatar">
-        <p class="no-spacing">Felipe</p>
+        <img class="user-image" src="{{ session['avatar_url'] }}" alt="GitHub Avatar">
+
+        <p class="no-spacing">{{ session['name']}}</p>
     </div>
 
-    <form action="/change" method="post">
+    <form action="/account" method="post">
     
 
 
-        <h2 class="text-center">Update any informations you want, nothing is required here</h2>
-        <p class="text-center">Colocar como placeholder as informações atuais do usuario</p>
+        <h2 class="text-center">Update just the informations you want, nothing is required here</h2>
+
+        <div class="row">
+            <div class="col">
+                <label for="name">Your name</label>
+                <input autofocus class="form-control" id="name" name="name" placeholder="{{ user[0]['name'] }}" type="text">
+            </div>
+            <div class="col">
+                <label for="last-name">Your last name</label>
+                <input class="form-control" id="last_name" name="last_name" placeholder="{{ user[0]['last_name'] }}" type="text">
+            </div>
+        </div>
+
         <div class="row">
             <div class="col">
                 <label for="password">Change your password</label>
-                <input class="form-control" id="password" name="password" placeholder="Password..." type="password">
+                <input class="form-control" id="password" name="password" placeholder="New password..." type="password">
             </div>
             
             <div class="col">
-
-
-
-                <label for="confirmation">Confirm your new password </label>                <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm password..." type="password">
+                <label for="confirmation">Confirm your new password </label>                
+                <input class="form-control" id="confirmation" name="confirmation" placeholder="Confirm new password..." type="password">
             </div>
         </div>
         <div class="row">
             
             <div class="col">
                 <label for="city">Your city</label>
-                <input class="form-control" id="city" name="city" placeholder="Your city..." type="text">
+                <input class="form-control" id="city" name="city" placeholder="{{ user[0]['city'] }}" type="text">
             </div>
             
             <div class="col">
             <label for="state">Your state</label>
-            <input class="form-control" id="state" name="state" placeholder="Your state..." type="text">
+            <input class="form-control" id="state" name="state" placeholder="{{ user[0]['state'] }}" type="text">
         </div>
         
         <div class="col">
             <label for="country">Your country</label>
-            <input class="form-control" id="country" name="country" placeholder="Your country..." type="text">
+            <input class="form-control" id="country" name="country" placeholder="{{ user[0]['country'] }}" type="text">
         </div>
     
-    
+        <input name="user_id" type="hidden" value="{{ user[0]['id'] }}" />
         <button type="submit" class="btn btn-primary">Update your infos</button>
     </form>
     
