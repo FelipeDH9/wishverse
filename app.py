@@ -54,6 +54,9 @@ def currency_format(value):
 app.jinja_env.filters["money_format"] = money_format
 app.jinja_env.filters["currency_format"] = currency_format
 
+# tax over products
+PRODUCT_TAX = 1.08
+
 
 @app.after_request
 def after_request(response):
@@ -95,7 +98,7 @@ def register():
         name = request.form.get("name").title().strip()
         last_name = request.form.get("last_name").title().strip()
         user_name = request.form.get("user_name").strip()
-        github = request.form.get("github").strip()
+        github_username = request.form.get("github_username").strip()
         password = request.form.get("password").strip()
         confirmation = request.form.get("confirmation").strip()
         city = request.form.get("city").title().strip()
@@ -158,7 +161,7 @@ def register():
                     state,
                     country,
                     currency,
-                    github,
+                    github_username,
                 ),
             )
 
@@ -171,10 +174,16 @@ def register():
 
             session["user_id"] = user[0]["id"]
             session["name"] = user[0]["name"]
+            session["last_name"] = user[0]["last_name"]
+            session["user_name"] = user[0]["user_name"]
+            session["city"] = user[0]["city"]
+            session["state"] = user[0]["state"]
+            session["country"] = user[0]["country"]
             session["currency"] = user[0]["currency"]
                    
             
             if not user[0]["github_username"]:
+                session["github_username"] = user[0]["github_username"]
                 session['avatar_url'] = "/static/avatar.png"
 
             else:
@@ -182,6 +191,8 @@ def register():
                     requests.get(f"https://api.github.com/users/{user[0]['github_username']}")
                 ).json()
                 session['avatar_url'] = github_response["avatar_url"]
+                session["github_username"] = user[0]["github_username"]
+
 
 
             for currency in CURRENCIES:
@@ -233,8 +244,6 @@ def login():
             flash("Incorrect password!", "danger")
             return redirect("/login")
 
-
-
         else:
             github_username = user[0]["github_username"]
             
@@ -250,7 +259,14 @@ def login():
 
             session["user_id"] = user[0]["id"]
             session["name"] = user[0]["name"]
+            session["last_name"] = user[0]["last_name"]
+            session["user_name"] = user[0]["user_name"]
+            session["city"] = user[0]["city"]
+            session["state"] = user[0]["state"]
+            session["country"] = user[0]["country"]
+            session["github_username"] = user[0]["github_username"]
             session["currency"] = user[0]["currency"]
+
 
             for currency in CURRENCIES:
                 if currency["iso"] == user[0]["currency"]:
@@ -332,7 +348,6 @@ def list():
     user_id = session["user_id"]
 
     conn = get_db_connection()
-    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
     user_products = conn.execute(
         "SELECT * FROM products WHERE user_id = ?", (user_id,)
     ).fetchall()
@@ -341,17 +356,17 @@ def list():
     # total price of all user's products
     total_price = 0
     total_favorites_price = 0
-    product_tax = 1.08
+    
 
     for product in user_products:
         # sum total price of all favorite products
         if product["is_favorite"] == 1:
-            product_price = float(product["price"]) * float(product["quantity"]) * product_tax
+            product_price = float(product["price"]) * float(product["quantity"]) * PRODUCT_TAX
             total_favorites_price += product_price
 
         # sum all products
 
-        product_price = product["price"] * product["quantity"] * product_tax
+        product_price = product["price"] * product["quantity"] * PRODUCT_TAX
         total_price += product_price
 
     # get currency conversion from api
@@ -377,7 +392,7 @@ def list():
         total_favorites_price=total_favorites_price,
         total_favorites_converted=total_favorites_converted,
         plus_safety_margin=plus_safety_margin,
-        product_tax=product_tax,
+        product_tax=PRODUCT_TAX,
     )
 
 
@@ -462,42 +477,97 @@ def delete():
         return redirect('/list')  
 
 
-# TODO
 @app.route("/account", methods=["POST", "GET"])
 @login_required
 def account():
     if request.method == "POST":
         user_id = request.form.get("user_id")
-        new_name = request.form.get("name")
-        new_last_name = request.form.get("last_name")
-        new_password = request.form.get("password")
-        new_confirmation = request.form.get("confirmation")
-        new_city = request.form.get("city")
-        new_state = request.form.get("state")
-        new_country = request.form.get("country")
+        new_name = request.form.get("name").strip().title()
+        new_last_name = request.form.get("last_name").strip().title()
+        new_password = request.form.get("password").strip()
+        new_confirmation = request.form.get("confirmation").strip()
+        new_github = request.form.get("github_username").strip()
+        new_city = request.form.get("city").strip().title()
+        new_state = request.form.get("state").strip().title()
+        new_country = request.form.get("country").strip().title()
 
-        currency = request.form.get("currency")
-
-        if not user_id or user_id < 1:
-            flash("User could not be found", "danger")
+        if not user_id or not user_id.isdigit() or int(user_id) <= 0:
+            flash(f"User {user_id} do not exist, try another one!", "danger")
             return redirect("/list")
-        elif user_id > 0:
-            conn = generate_password_hash()
-
-
-        # return render_template("message.html", message=user_id)
-        if new_name and new_name:
-            pass
         
-
-        # validate if currency exists
-        if currency not in CURRENCIES_ISO:
-            return render_template(
-                "message.html",
-                message="Currency not valid, please choose one in the select field!",
-            )
+        # check if requested id is equal to id saved in session  
+        elif int(session["user_id"]) != int(user_id):
+            flash(f"User {user_id} session: {session['user_id']} could not be found , try another one!", "danger")
+            return redirect("/list")
+        
+        # if user_id is correct
         else:
-            return render_template("message.html", message="Currency valid!")
+            conn = get_db_connection()
+            user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
+            changes = 0
+
+
+            # check name
+            if new_name and new_name != user[0]["name"]:
+                conn.execute("UPDATE users SET name = ? WHERE id = ?", (new_name, user_id,))
+                changes += 1
+                session["name"] = new_name
+            
+
+            # check last name  
+            if new_last_name and new_last_name != user[0]["last_name"]:
+                conn.execute("UPDATE users SET last_name = ? WHERE id = ?", (new_last_name, user_id,))
+                changes += 1
+                session["last_name"] = new_last_name
+
+            
+            # check city 
+            if new_city and new_city != user[0]["city"]:
+                conn.execute("UPDATE users SET city = ? WHERE id = ?", (new_city, user_id,))
+                changes += 1
+                session["city"] = new_city
+
+            
+            # check state 
+            if new_state and new_state != user[0]["state"]:
+                conn.execute("UPDATE users SET state = ? WHERE id = ?", (new_state, user_id,))
+                changes += 1
+                session["state"] = new_state
+
+                           
+            # check country 
+            if new_country and new_country != user[0]["country"]:
+                conn.execute("UPDATE users SET country = ? WHERE id = ?", (new_country, user_id,))
+                changes += 1
+                session["country"] = new_country
+                
+
+            # check github
+            if new_github and new_github != user[0]["github_username"]:
+                conn.execute("UPDATE users SET github_username = ? WHERE id = ?", (new_github, user_id,))
+                changes += 1
+                github_response = (requests.get(f"https://api.github.com/users/{new_github}")).json()
+                session['avatar_url'] = github_response["avatar_url"]
+                session["github_username"] = new_github
+            
+            # check password 
+            if new_password and new_confirmation and new_password == new_confirmation:
+                hash = generate_password_hash(new_password)
+                conn.execute("UPDATE users SET hash = ? WHERE id = ?", (hash, user_id,))
+                changes += 1
+
+
+            if changes > 0:
+                flash(f"User {session['user_name']} edited!","success",)
+
+            else:
+                flash(f"No changes in user {session['user_name']}","warning",)
+
+
+            conn.commit()
+            conn.close()
+            return redirect("/list")
+
 
     else:  # GET
         user_id = request.args.get("user_id")
@@ -574,10 +644,11 @@ def change():
         product_quantity = request.form.get("quantity").strip()
         
         
-        if not product_id or int(product_id) < 1:
+        if not product_id or int(product_id) < 1 or product_id != session["product_id"]:
             flash("Product could not be found, try another one!", "danger")
             return redirect("/list")
-
+        
+        
         conn = get_db_connection()
         product_before = conn.execute(
             "SELECT * FROM products WHERE id = ?", (product_id,)
@@ -697,6 +768,8 @@ def change():
                 "SELECT * FROM products WHERE id = ?", (product_id,)
             ).fetchall()
             conn.close()
+
+            session["product_id"] = product_id
         
 
         return render_template("edit.html", product=product)
