@@ -71,7 +71,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            return redirect("/read")
+            return redirect("/about")
         return f(*args, **kwargs)
 
     return decorated_function
@@ -80,13 +80,7 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    user_id = session["user_id"]
-
-    conn = get_db_connection()
-    user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchall()
-    conn.close()
-
-    return render_template("index.html", user=user)
+    return render_template("index.html")
 
 
 @app.route("/register", methods=["POST", "GET"])
@@ -274,8 +268,7 @@ def login():
 
             session["currency_name"] = currency_name
 
-            # flash(f"{user_name} login", "success")
-            return redirect("/")
+            return redirect("/list")
 
     else:  # GET
         return render_template("login.html")
@@ -775,8 +768,8 @@ def change():
         return render_template("edit.html", product=product)
 
 
-@app.route("/read")
-def read():
+@app.route("/about")
+def about():
     return render_template("index.html")
 
 

@@ -173,19 +173,6 @@ label {
   width: 100%;
 }
 
-/* .btn2 {
-    background-color: var(--main-color);
-    border: 1px solid var(--main-color);
-    width: 100%;
-    font-weight: bold;
-    border-radius: 5px;
-}
-
-.btn2 > span {
-    color: black;
-    padding: 5px;
-    
-} */
 .btn {
   margin-top: 1rem;
   background-color: var(--secondary-color);
@@ -208,7 +195,6 @@ label {
 
 .currency {
   width: auto;
-  /* margin: 1rem; */
 }
 
 .custom-select {
@@ -240,6 +226,13 @@ h3,
 p {
   margin-top: 0;
 }
+
+.card-title {
+	line-height: 2rem;
+	padding: 0;
+  color: #ffffff;
+}
+
 
 .card-infos {
   margin-bottom: 0;
@@ -305,12 +298,24 @@ p {
   opacity: 0.5;
 }
 
+/* ADD PRODUCT BUTTON */
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-btn > svg {
+  margin-right: 5px;
+}
+
 /* favorite item button */
 .favorite-btn,
 .favorite-btn > span {
   background-color: var(--bg-color);
   border: 0px var(--bg-color) solid;
   color: rgb(230 0 255);
+  padding: 0;
 }
 
 .favorite-btn:hover,

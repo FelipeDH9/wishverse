@@ -17,8 +17,9 @@
 
     <div class="text-center">
 
-        {% if user %}
-            <h1>Hello, {{user[0]["name"]}}!</h1>
+        {% if session["user_id"] %}
+            <h1>Hello, {{ session["name"]}}!</h1>
+
         {% endif%}
 
         <h1>Welcome to WishVerse!</h1>
@@ -28,7 +29,7 @@
         <h2>Falar que coloquei uma margem de 3% sobre o valor total em dolar (valor + 6%) pois pode ter taxas e impostos adicionais que não conheço, no final o imposto total ficou em torno de 9%</h2>
         <h2>E colocar +3% na taxa de conversão pois pode ter taxas sobre conversão das moedas</h2>
         
-        {% if user %}
+        {% if session["user_id"] %}
             <a href="/add">Add products to your wishlist!</a>
 
         {% endif %}
