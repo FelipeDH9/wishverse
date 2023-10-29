@@ -50,6 +50,16 @@ def money_format(value):
 def currency_format(value):
     return f"{value:,.4f}"
 
+def get_github(github):
+    github_response = (requests.get(f"https://api.github.com/users/{github}"))            
+
+    if github_response.status_code == 200:
+        response = github_response.json()
+        session['avatar_url'] = response["avatar_url"]
+    else:
+        session['avatar_url'] = "/static/avatar.png"
+    
+    return session['avatar_url']
 
 app.jinja_env.filters["money_format"] = money_format
 app.jinja_env.filters["currency_format"] = currency_format
@@ -92,13 +102,12 @@ def register():
         name = request.form.get("name").title().strip()
         last_name = request.form.get("last_name").title().strip()
         user_name = request.form.get("user_name").strip()
-        github_username = request.form.get("github_username").strip()
+        github = request.form.get("github").strip()
         password = request.form.get("password").strip()
         confirmation = request.form.get("confirmation").strip()
-        city = request.form.get("city").title().strip()
-        state = request.form.get("state").title().strip()
         country = request.form.get("country").title().strip()
         currency = request.form.get("currency")
+        linkedin = request.form.get("linkedin").strip()
 
         # search DB for user_name provided
         conn = get_db_connection()
@@ -113,31 +122,28 @@ def register():
             or not user_name
             or not password
             or not confirmation
-            or not city
-            or not state
             or not country
         ):
             flash("Please fill all fields to register!", "warning")
-            return render_template("register.html")
+            return render_template("register.html", currencies=CURRENCIES)
 
         # check if user already exists
         elif len(db_users) != 0:
             flash("User name already exists!", "warning")
-            return render_template("register.html")
+            return render_template("register.html", currencies=CURRENCIES)
 
         # check if passwords match
         elif password != confirmation:
             flash("Passwords do not match, please try again!", "warning")
-            return render_template("register.html")
+            return render_template("register.html", currencies=CURRENCIES)
 
         # validate if currency exists
         elif currency not in CURRENCIES_ISO:
             flash(
                 "Currency not valid, please choose one in the select field!", "warning"
             )
-            return render_template("register.html")
+            return render_template("register.html", currencies=CURRENCIES)
         
-
             
             
         # if everything is fine
@@ -145,17 +151,16 @@ def register():
             hash = generate_password_hash(password)
             # insert new user to db
             conn.execute(
-                "INSERT INTO users (name, last_name, user_name, hash, city, state, country, currency, github_username) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO users (name, last_name, user_name, hash, country, currency, github, linkedin) VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     name,
                     last_name,
                     user_name,
                     hash,
-                    city,
-                    state,
                     country,
                     currency,
-                    github_username,
+                    github,
+                    linkedin,
                 ),
             )
 
@@ -170,24 +175,14 @@ def register():
             session["name"] = user[0]["name"]
             session["last_name"] = user[0]["last_name"]
             session["user_name"] = user[0]["user_name"]
-            session["city"] = user[0]["city"]
-            session["state"] = user[0]["state"]
             session["country"] = user[0]["country"]
             session["currency"] = user[0]["currency"]
+            session["linkedin"] = user[0]["linkedin"]
+
                    
             
-            if not user[0]["github_username"]:
-                session["github_username"] = user[0]["github_username"]
-                session['avatar_url'] = "/static/avatar.png"
-
-            else:
-                github_response = (
-                    requests.get(f"https://api.github.com/users/{user[0]['github_username']}")
-                ).json()
-                session['avatar_url'] = github_response["avatar_url"]
-                session["github_username"] = user[0]["github_username"]
-
-
+            get_github(github)
+           
 
             for currency in CURRENCIES:
                 if currency["iso"] == user[0]["currency"]:
@@ -231,7 +226,7 @@ def login():
 
         if len(user) != 1:
             flash("User do not exist, please register!", "warning")
-            return render_template("register.html")
+            return render_template("register.html", currencies=CURRENCIES)
 
         # check if password saved in DB is equal to password provided
         elif not check_password_hash(user[0]["hash"], password):
@@ -239,26 +234,16 @@ def login():
             return redirect("/login")
 
         else:
-            github_username = user[0]["github_username"]
+            github = user[0]["github"]
+            get_github(github)
             
-            if not github_username:
-                session['avatar_url'] = "/static/avatar.png"
-
-            else:
-                github_response = (
-                    requests.get(f"https://api.github.com/users/{github_username}")
-                ).json()
-                session['avatar_url'] = github_response["avatar_url"]
-
 
             session["user_id"] = user[0]["id"]
             session["name"] = user[0]["name"]
             session["last_name"] = user[0]["last_name"]
             session["user_name"] = user[0]["user_name"]
-            session["city"] = user[0]["city"]
-            session["state"] = user[0]["state"]
             session["country"] = user[0]["country"]
-            session["github_username"] = user[0]["github_username"]
+            session["github"] = user[0]["github"]
             session["currency"] = user[0]["currency"]
 
 
@@ -479,10 +464,9 @@ def account():
         new_last_name = request.form.get("last_name").strip().title()
         new_password = request.form.get("password").strip()
         new_confirmation = request.form.get("confirmation").strip()
-        new_github = request.form.get("github_username").strip()
-        new_city = request.form.get("city").strip().title()
-        new_state = request.form.get("state").strip().title()
         new_country = request.form.get("country").strip().title()
+        new_github = request.form.get("github").strip()
+        new_linkedin = request.form.get("linkedin")
 
         if not user_id or not user_id.isdigit() or int(user_id) <= 0:
             flash(f"User {user_id} do not exist, try another one!", "danger")
@@ -513,20 +497,6 @@ def account():
                 changes += 1
                 session["last_name"] = new_last_name
 
-            
-            # check city 
-            if new_city and new_city != user[0]["city"]:
-                conn.execute("UPDATE users SET city = ? WHERE id = ?", (new_city, user_id,))
-                changes += 1
-                session["city"] = new_city
-
-            
-            # check state 
-            if new_state and new_state != user[0]["state"]:
-                conn.execute("UPDATE users SET state = ? WHERE id = ?", (new_state, user_id,))
-                changes += 1
-                session["state"] = new_state
-
                            
             # check country 
             if new_country and new_country != user[0]["country"]:
@@ -536,20 +506,25 @@ def account():
                 
 
             # check github
-            if new_github and new_github != user[0]["github_username"]:
-                conn.execute("UPDATE users SET github_username = ? WHERE id = ?", (new_github, user_id,))
+            if new_github and new_github != user[0]["github"]:
+                conn.execute("UPDATE users SET github = ? WHERE id = ?", (new_github, user_id,))
+                get_github(new_github)
+                session["github"] = new_github
                 changes += 1
-                github_response = (requests.get(f"https://api.github.com/users/{new_github}")).json()
-                session['avatar_url'] = github_response["avatar_url"]
-                session["github_username"] = new_github
             
             # check password 
             if new_password and new_confirmation and new_password == new_confirmation:
                 hash = generate_password_hash(new_password)
                 conn.execute("UPDATE users SET hash = ? WHERE id = ?", (hash, user_id,))
                 changes += 1
+            
+            # check linkedin
+            if new_linkedin and new_linkedin != user[0]["linkedin"]:
+                conn.execute("UPDATE users SET linkedin = ? WHERE id = ?", (new_linkedin.strip(), user_id,))
+                changes += 1
+                session["linkedin"] = new_linkedin
 
-
+            
             if changes > 0:
                 flash(f"User {session['user_name']} edited!","success",)
 

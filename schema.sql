@@ -4,11 +4,10 @@ CREATE TABLE IF NOT EXISTS users (
     last_name TEXT NOT NULL,
     user_name TEXT NOT NULL,
     hash TEXT NOT NULL,
-    city TEXT NOT NULL,
-    state TEXT NOT NULL,
     country TEXT NOT NULL,
     currency TEXT NOT NULL,
-    github_username TEXT
+    github TEXT,
+    linkedin TEXT
 );
 
 

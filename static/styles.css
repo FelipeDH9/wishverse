@@ -298,6 +298,24 @@ p {
   opacity: 0.5;
 }
 
+/* EDIT PAGE */
+.currency {
+  padding: 0;
+  margin: 0;
+  margin-right: .5rem;
+  }
+  
+  
+  .currency-select {
+  margin:  0;
+  }
+  
+  .currency-flex {
+  margin-top: 1rem;
+  align-items: center;
+  }
+  
+
 /* ADD PRODUCT BUTTON */
 .add-btn {
   display: flex;
@@ -405,14 +423,18 @@ p {
     margin-top: 2rem;
   }
 
+  /* EDIT PAGE */
   .edit-btn {
     margin-bottom: 1rem;
   }
 
-  /* .card-infos {
-        margin-bottom: 0;
-        padding: 8px;
-    } */
+  h3 {
+    margin-top: 1rem;
+  }
+
+  .currency {
+    margin-bottom: .5rem;
+    }
 }
 
 @media (max-width: 320px) {
