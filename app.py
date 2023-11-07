@@ -4,6 +4,7 @@ import requests
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from flask_session import Session
+from decimal import Decimal, InvalidOperation
 
 
 app = Flask(__name__)
@@ -50,6 +51,7 @@ def money_format(value):
 def currency_format(value):
     return f"{value:,.4f}"
 
+
 def get_github(github):
     github_response = (requests.get(f"https://api.github.com/users/{github}"))            
 
@@ -60,6 +62,14 @@ def get_github(github):
         session['avatar_url'] = "/static/avatar.png"
     
     return session['avatar_url']
+
+
+def is_decimal(n):
+    try:
+        Decimal(n)
+        return True
+    except InvalidOperation:
+        return False
 
 app.jinja_env.filters["money_format"] = money_format
 app.jinja_env.filters["currency_format"] = currency_format
@@ -284,9 +294,14 @@ def add():
             flash("Please fill all fileds with *", "warning")
             return redirect("/add")
 
-        elif not product_price.isdigit() or float(product_price) <= 0:
+        # elif not product_price.isdigit() or float(product_price) <= 0:
+        #     flash("Price must be a real positive number", "warning")
+        #     return redirect("/add")
+        
+        elif not is_decimal(product_price) or float(product_price) <= 0:
             flash("Price must be a real positive number", "warning")
             return redirect("/add")
+
 
         elif not product_quantity.isdigit() or int(product_quantity) <= 0:
             flash("Quantity must be a integer positive number", "warning")
@@ -662,15 +677,14 @@ def change():
                     product_id,
                 ),
             )
-            changes += 1
+            changes += 1      
         
         if (
             product_price
             and product_price != product_before[0]["price"]
-            and product_price.isdigit()
+            and is_decimal(product_price)
             and float(product_price) > 0
         ):
-            
             conn.execute(
                 "UPDATE products SET price = ? WHERE id = ?",
                 (
