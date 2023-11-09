@@ -441,7 +441,6 @@ def favorite():
             return redirect("/list")
 
 
-# TODO A POPUP TO CONFIRM DELETE PRODUCT ACTION
 @app.route("/delete", methods=["POST"])
 @login_required
 def delete():
@@ -462,11 +461,14 @@ def delete():
     
     if int(product_id) not in id_list:
         flash(f"Product {product_id} could not be found {id_list}, try another one!", "danger")
+        conn.close()
         return redirect("/list")
     
     else:
-
-        flash("Fazer popup de confirmação para deletar", "warning")
+        conn.execute("DELETE FROM products WHERE id = ?", (product_id,))
+        conn.commit()
+        conn.close()
+        flash("Product deleted", "warning")
         return redirect('/list')  
 
 

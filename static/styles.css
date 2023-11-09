@@ -2,6 +2,11 @@
   --main-color: rgba(0, 129, 112, 1);
   --secondary-color: rgb(0, 165, 143);
   --bg-color: #232d3f;
+  --fav-color: rgb(25, 172, 5);
+  --text-color: rgb(255, 255, 255);
+  --footer-color: rgba(0, 0, 0, 0.2);
+  --delete-btn: rgb(192, 30, 38);
+  --btn-hover: rgb(0 0 0);
 }
 
 h1,
@@ -14,9 +19,8 @@ p,
 li,
 span,
 label {
-  color: white;
+  color: var(--text-color);
   padding: 1rem 0;
-  /* word-wrap: break-word; */
 }
 
 h1,
@@ -69,13 +73,10 @@ header {
   background-color: var(--main-color);
 }
 
-.nave-link {
-  color: red !important;
-}
 
 .nav-item .nav-link {
   font-weight: bold;
-  color: white;
+  color: var(--text-color);
   font-size: 1.5rem;
 }
 
@@ -86,7 +87,7 @@ header {
 .navbar-brand {
   font-size: 1.6rem;
   font-weight: bold;
-  color: white;
+  color: var(--text-color);
 }
 
 .navbar-brand:hover {
@@ -111,7 +112,7 @@ header {
 
 /* FOOTER */
 footer {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--footer-color);
   margin-top: auto;
 }
 
@@ -230,7 +231,8 @@ p {
 .card-title {
 	line-height: 2rem;
 	padding: 0;
-  color: #ffffff;
+  color: var(--text-color);
+  text-align: center;
 }
 
 
@@ -239,81 +241,59 @@ p {
   padding: 8px;
 }
 
-.button-1 {
-  background-color: var(--secondary-color);
-  padding: 5px 9px;
+.card-btns {
   border-radius: 5px;
-  border: 1px solid var(--secondary-color);
-  color: white;
+  color: var(--text-color);
+  border: 0px;
+  padding: 5px 0;
+  width: 190px;
+  display: flex;
+  align-items: center;
   text-decoration: none;
+  font-weight: bold;
+  justify-content: center;
 }
 
-.button-1:hover {
-  background-color: var(--main-color);
-  border-color: var(--main-color);
-  color: white;
+.card-btns > svg {
+  margin-right: 5px;
+}
+
+.card-btns:hover {
+  opacity: 0.5;
+  color: var(--hover-color);
+}
+
+/* LINK BUTTON */
+.link-btn {
+  background-color: var(--secondary-color);
 }
 
 /* delete item button */
 .delete-btn {
-  text-decoration: none;
-  color: white;
-  background-color: red;
-  border: 1px solid red;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-}
-
-.delete-btn span {
-  padding: 5px;
-  font-weight: bold;
-}
-
-.delete-btn:hover {
-  text-decoration: underline;
-  opacity: 0.5;
+  background-color: var(--delete-btn);
 }
 
 /* edit item button */
 .edit-btn {
-  text-decoration: none;
-  color: black;
   background-color: var(--main-color);
-  border: 1px solid var(--main-color);
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  padding: 0px 14px;
 }
 
-.edit-btn span {
-  padding: 5px;
-  color: black;
-  font-weight: bold;
-}
-
-.edit-btn:hover {
-  text-decoration: underline;
-  opacity: 0.5;
-}
 
 /* EDIT PAGE */
 .currency {
   padding: 0;
   margin: 0;
   margin-right: .5rem;
-  }
+}
   
-  
-  .currency-select {
+.currency-select {
   margin:  0;
-  }
+}
   
-  .currency-flex {
+.currency-flex {
   margin-top: 1rem;
   align-items: center;
-  }
+}
   
 
 /* ADD PRODUCT BUTTON */
@@ -330,15 +310,16 @@ p {
 /* favorite item button */
 .favorite-btn,
 .favorite-btn > span {
-  background-color: var(--bg-color);
-  border: 0px var(--bg-color) solid;
-  color: rgb(230 0 255);
+  background: none;
+  border: 0px;
+  color: var(--fav-color);
   padding: 0;
+  font-weight: bold;
 }
 
 .favorite-btn:hover,
 .favorite-btn > span:hover {
-  text-decoration: underline;
+  opacity: .5;
 }
 
 /* ACCOUNT */
@@ -360,7 +341,6 @@ p {
   width: 100%;
   margin: 0;
   padding: 6.5px;
-  /* height: 3rem; */
 }
 
 /* ALERTS */
@@ -399,6 +379,53 @@ p {
   line-height: 2rem;
 }
 
+/* DIALOG MODAL */
+dialog::backdrop {
+  background-color: rgb(0, 0,0, .5);
+}
+
+dialog {
+  background-color: var(--bg-color);
+  border-radius: 1rem;
+  border: 2px solid var(--main-color);
+}
+
+dialog > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+dialog > p, h1 {
+  text-align: center;
+}
+
+.dl-btn {
+  border-radius: 5px;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+  border: 0px;
+  width: 8rem;
+}
+
+.confirm {
+  background-color: var(--delete-btn);
+  color: var(--text-color);
+}
+
+.confirm:hover {
+  color: var(--btn-hover);
+  opacity: 0.5;
+}
+
+.close {
+  background: white;
+}
+
+.close:hover {
+  opacity: 0.5;
+}
+
+
 /* RESPONSIVE */
 @media (max-width: 767px) {
   /* REGISTER */
@@ -413,6 +440,7 @@ p {
   .card > .card-body > .flex {
     align-items: center;
     flex-direction: column;
+    width: 100%
   }
 
   .card-body > .flex > h2 {
@@ -420,12 +448,24 @@ p {
   }
 
   .delete-btn {
-    margin-top: 2rem;
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .edit-form {
+    width: 100%;
   }
 
   /* EDIT PAGE */
   .edit-btn {
     margin-bottom: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .link-btn {
+    width: 100%;
   }
 
   h3 {
