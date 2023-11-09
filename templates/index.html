@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}{% endblock %}
+{% block title %}: About{% endblock %}
 
 
 {% block main %}
@@ -19,12 +19,15 @@
 
         {% if session["user_id"] %}
             <h1>Hello, {{ session["name"]}}!</h1>
+        {% else %}
+            <h1>Welcome to WishVerse!</h1>
+            <h2>Since you are new here, please <a href="/register">register</a> to have access to all the functionalities of the project.</h2>
+            
 
         {% endif%}
 
-        <h1>Welcome to WishVerse!</h1>
-        <h4>WishVerse is a web application focused for those who does not live in USA (<i>United State of America</i>) and plan to travel to there. </h4>
-        <h3>página home, que vai aparecer se a pessoa estiver logada ou não, é para explicar o que o projeto faz, vai mostrar que da para se registrar, adicionar produtos na lista, colocar os links que quiser, o preço do produto, que da para alterar as informações de cada produto, alterar senha, cidade, estado, país, moedas.
+        <h4>WishVerse is a web application focused for those who does not live in USA (<i>United State of America</i>) and plan to travel to there.</h4>
+        <h3>página about, que vai aparecer se a pessoa estiver logada ou não, é para explicar o que o projeto faz, vai mostrar que da para se registrar, adicionar produtos na lista, colocar os links que quiser, o preço do produto, que da para alterar as informações de cada produto, alterar senha, cidade, estado, país, moedas.
         </h3>
         <h2>Falar que coloquei uma margem de 3% sobre o valor total em dolar (valor + 6%) pois pode ter taxas e impostos adicionais que não conheço, no final o imposto total ficou em torno de 9%</h2>
         <h2>E colocar +3% na taxa de conversão pois pode ter taxas sobre conversão das moedas</h2>

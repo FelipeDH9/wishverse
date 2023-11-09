@@ -14,12 +14,14 @@ main %} {% for category, message in get_flashed_messages(with_categories=true)
 {% endfor %}
 
 <h1 class="text-center">Add Products to your list</h1>
-<h5 class="text-center">Fields with * on it are required</h5>
+<!-- <h5 class="text-center">Fields with * on it are required</h5> -->
+<h3 class="text-center">Required:</h3>
+
 
 <form action="/add" method="post">
   <div class="row">
     <div class="col">
-      <label for="brand">Product Brand *</label>
+      <label for="brand">Product Brand</label>
       <input
         autofocus
         class="form-control"
@@ -30,7 +32,7 @@ main %} {% for category, message in get_flashed_messages(with_categories=true)
       />
     </div>
     <div class="col">
-      <label for="name">Product Name *</label>
+      <label for="name">Product Name</label>
       <input
         class="form-control"
         id="name"
@@ -43,7 +45,7 @@ main %} {% for category, message in get_flashed_messages(with_categories=true)
 
   <div class="row">
     <div class="col">
-      <label for="price">Product Price *</label>
+      <label for="price">Product Price</label>
       <input
         class="form-control"
         id="price"
@@ -56,7 +58,7 @@ main %} {% for category, message in get_flashed_messages(with_categories=true)
     </div>
 
     <div class="col">
-      <label for="quantity">Quantity wanted *</label>
+      <label for="quantity">Quantity</label>
       <input
         class="form-control"
         id="quantity"
@@ -68,6 +70,7 @@ main %} {% for category, message in get_flashed_messages(with_categories=true)
     </div>
   </div>
 
+  <h3 class="text-center">Optionals:</h3>
   <label for="link">Product link</label>
   <input
     class="form-control"

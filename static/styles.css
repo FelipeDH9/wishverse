@@ -17,10 +17,12 @@ h5,
 h6,
 p,
 li,
-span,
+span {
+  color: var(--text-color);
+}
+
 label {
   color: var(--text-color);
-  padding: 1rem 0;
 }
 
 h1,
@@ -29,7 +31,7 @@ h3,
 h4,
 h5,
 h6 {
-  padding: 0.5rem;
+  padding: 0.5rem 0;
   margin: 0;
 }
 
@@ -294,7 +296,11 @@ p {
   margin-top: 1rem;
   align-items: center;
 }
-  
+
+/* ADD PRODUCT PAGE */
+.form-control {
+  margin-bottom: 1rem;
+}
 
 /* ADD PRODUCT BUTTON */
 .add-btn {
@@ -472,9 +478,9 @@ dialog > p, h1 {
     margin-top: 1rem;
   }
 
-  .currency {
+  /* .currency {
     margin-bottom: .5rem;
-    }
+    } */
 }
 
 @media (max-width: 320px) {
@@ -498,4 +504,8 @@ dialog > p, h1 {
   .navbar-toggler {
     margin: 0;
   }
+
+    .currency {
+    margin-bottom: .5rem;
+    }
 }
