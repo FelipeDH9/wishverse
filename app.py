@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from flask_session import Session
 from decimal import Decimal, InvalidOperation
-# from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
@@ -17,14 +17,23 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Initialize DB
 # db = SQLAlchemy(app)
-
-# class 
-
+# Creating model (table)
+# class User(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(50), nullable=False)
+#     last_name = db.Column(db.String(50), nullable=False)
+#     user_name = db.Column(db.String(50), nullable=False, unique=True)
+#     hash = db.Column(db.String(200), nullable=False)
+#     country = db.Column(db.String(50), nullable=False)
+#     currency = db.Column(db.String(3), nullable=False)
+#     github = db.Column(db.String(100), nullable=False)
+#     linkedin = db.Column(db.String(100), nullable=False)
 
 # DB connection
 def get_db_connection():
-    conn = sqlite3.connect("postgres://kolposefgivsfg:f55297fb1552520b77a14e2919c93e6430762fedb89aa78499140933412274d6@ec2-18-213-255-35.compute-1.amazonaws.com:5432/da2v8nmgjslig3")
+    conn = sqlite3.connect("database.sqlite3")
     conn.row_factory = sqlite3.Row
     return conn
 
