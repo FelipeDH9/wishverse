@@ -21,6 +21,11 @@ span {
   color: var(--text-color);
 }
 
+body {
+  font-family: 'Ubuntu', sans-serif;
+
+}
+
 label {
   color: var(--text-color);
 }
@@ -97,7 +102,8 @@ header {
 }
 
 .navbar-toggler {
-  margin: 0.5rem;
+  margin: 0rem;
+  padding: 0;
   border: none;
 }
 
@@ -160,11 +166,11 @@ footer .icon:hover {
 }
 
 a {
-  color: var(--main-color);
+  color: var(--secondary-color);
 }
 
 a:hover {
-  color: var(--secondary-color);
+  color: var(--main-color);
 }
 
 /* REGISTER */
@@ -431,7 +437,10 @@ dialog > p, h1 {
   opacity: 0.5;
 }
 
-
+/* ABOUT WISHVERSE */
+.colored {
+  color: var(--secondary-color);
+}
 /* RESPONSIVE */
 @media (max-width: 767px) {
   /* REGISTER */

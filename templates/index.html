@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}: About{% endblock %}
+{% block title %}{% endblock %}
 
 
 {% block main %}
@@ -18,24 +18,40 @@
     <div class="text-center">
 
         {% if session["user_id"] %}
-            <h1>Hello, {{ session["name"]}}!</h1>
+            <h1 class="colored">Hello, {{ session["name"]}}!</h1>
         {% else %}
-            <h1>Welcome to WishVerse!</h1>
+            <h1 class="colored">Welcome to WishVerse!</h1>
             <h2>Since you are new here, please <a href="/register">register</a> to have access to all the functionalities of the project.</h2>
-            
-
         {% endif%}
 
-        <h4>WishVerse is a web application focused for those who does not live in USA (<i>United State of America</i>) and plan to travel to there.</h4>
-        <h3>página about, que vai aparecer se a pessoa estiver logada ou não, é para explicar o que o projeto faz, vai mostrar que da para se registrar, adicionar produtos na lista, colocar os links que quiser, o preço do produto, que da para alterar as informações de cada produto, alterar senha, cidade, estado, país, moedas.
-        </h3>
-        <h2>Falar que coloquei uma margem de 3% sobre o valor total em dolar (valor + 6%) pois pode ter taxas e impostos adicionais que não conheço, no final o imposto total ficou em torno de 9%</h2>
-        <h2>E colocar +3% na taxa de conversão pois pode ter taxas sobre conversão das moedas</h2>
+        <h4>WishVerse is a web application focused on those who do not live in the USA (<i>United States of America</i>) and plan to travel there.</h4>
         
         {% if session["user_id"] %}
-            <a href="/add">Add products to your wishlist!</a>
-
+        <h4 class="colored">Register</h4>
+        {% else %}
+        <h4 class="colored"><a href="/register">Register</a></h4>
         {% endif %}
+
+        <p>The application utilizes the GitHub API to retrieve the user's avatar image. Therefore, if you wish to add a personal touch to your account, you can provide your GitHub username during registration or update this information after you log in.</p>
+        <p>There is also a designated field for your LinkedIn account link, where you can provide it for networking purposes. Feel free to share your LinkedIn profile to enhance our professional connections. 😁</p>
+
+        {% if session["user_id"] %}
+        <h4 class="colored"><a href="/list">Products List</a></h4>
+        {% else %}
+        <h4 class="colored">Products List</h4>
+        {% endif %}
+
+        {% if session["user_id"] %}
+        <p>After you register, new features will become available, such as <a href="/add"><strong>adding products to your wishlist</strong></a>, including them in your favorites list, <a href="/currency"><strong>changing your currency</strong></a>, and editing your account information.</p>
+        {% else %}
+        <p>After you register, new features will become available, such as <strong class="colored">adding products to your wishlist</strong>, including them in your favorites list, <strong class="colored">changing your currency</strong>, and editing your account information.</p>
+        {% endif %}
+
+        <p>When adding a new product or editing an existing one, you can input its brand and name, price in dollars, desired quantity, and optionally, include a link for purchase and additional information about the product.</p>
+        <p>You can create two lists: one containing all the products you've added and another exclusively for your favorites. And you can edit or delete specific products from your list.</p>        
+        <h4 class="colored">Important note:</h4>
+        <p>The application includes a 2% safety margin for currency conversion and takes into account an 8% tax on products. Please be aware that currency conversion rates may experience variations, and there might be differences compared to other applications.</p>
+        <p>However, it was developed to ensure you won't run out of money during your trip. <strong class="colored"> Better safe than sorry!</strong></p>
         
     </div>
 {% endblock %}
