@@ -5,14 +5,21 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from flask_session import Session
 from decimal import Decimal, InvalidOperation
+# from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
+app.config['SECRET_KEY'] = 'C098WNFD021LPA834asdcxzsadrwe32342'
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+# db = SQLAlchemy(app)
+
+# class 
 
 
 # DB connection
