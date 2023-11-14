@@ -7,7 +7,7 @@ __pycache__/
 # db
 /static/database.db
 /database.db
-/database.sqlite3
+# /database.sqlite3
 
 # flask_session
 flask_session/

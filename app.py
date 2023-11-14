@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from flask_session import Session
 from decimal import Decimal, InvalidOperation
+from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
