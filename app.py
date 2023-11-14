@@ -8,7 +8,7 @@ from decimal import Decimal, InvalidOperation
 
 
 app = Flask(__name__)
-
+app.config['SECRET_KEY'] = 'C098WNFD021LPA834asdcxzsadrwe32342'
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
