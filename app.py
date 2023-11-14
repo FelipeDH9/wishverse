@@ -24,7 +24,7 @@ Session(app)
 
 # DB connection
 def get_db_connection():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect("postgres://kolposefgivsfg:f55297fb1552520b77a14e2919c93e6430762fedb89aa78499140933412274d6@ec2-18-213-255-35.compute-1.amazonaws.com:5432/da2v8nmgjslig3")
     conn.row_factory = sqlite3.Row
     return conn
 
