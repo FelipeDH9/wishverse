@@ -5,31 +5,15 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from flask_session import Session
 from decimal import Decimal, InvalidOperation
-from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
-app.config['SECRET_KEY'] = 'C098WNFD021LPA834asdcxzsadrwe32342'
 # Configure session to use filesystem
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Initialize DB
-# db = SQLAlchemy(app)
-# Creating model (table)
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(50), nullable=False)
-#     last_name = db.Column(db.String(50), nullable=False)
-#     user_name = db.Column(db.String(50), nullable=False, unique=True)
-#     hash = db.Column(db.String(200), nullable=False)
-#     country = db.Column(db.String(50), nullable=False)
-#     currency = db.Column(db.String(3), nullable=False)
-#     github = db.Column(db.String(100), nullable=False)
-#     linkedin = db.Column(db.String(100), nullable=False)
 
 # DB connection
 def get_db_connection():
@@ -216,7 +200,7 @@ def register():
 
             session["currency_name"] = currency_name
 
-            flash(f"New user ({user_name}) registred", "success")
+            flash(f"Welcome to WishVerse!!!", "success")
             return redirect("/")
 
     # GET
@@ -310,9 +294,6 @@ def add():
             flash("Please fill all fileds with *", "warning")
             return redirect("/add")
 
-        # elif not product_price.isdigit() or float(product_price) <= 0:
-        #     flash("Price must be a real positive number", "warning")
-        #     return redirect("/add")
         
         elif not is_decimal(product_price) or float(product_price) <= 0:
             flash("Price must be a real positive number", "warning")
